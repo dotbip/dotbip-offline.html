@@ -1,0 +1,3731 @@
+<!DOCTYPE html>
+<!-- ============================================================
+     DotBip Offline Binary Grid
+     Version: 1.1.19
+     Author: DotBip Project  https://github.com/dotbip
+     License: MIT
+
+     SHA-256 VERIFICATION
+     After downloading this file, verify its integrity:
+
+       Linux (bash):
+         sha256sum dotbip-offline_v1.1.19.html
+
+       macOS (Terminal):
+         shasum -a 256 dotbip-offline_v1.1.19.html
+
+       Windows PowerShell:
+         Get-FileHash dotbip-offline_v1.1.19.html -Algorithm SHA256
+
+       Windows CMD:
+         certutil -hashfile dotbip-offline_v1.1.19.html SHA256
+
+       Online (no upload, runs in browser):
+         https://emn178.github.io/online-tools/sha256_checksum.html
+
+     NOTE: A file cannot self-certify its own SHA-256 — embedding the hash
+     would alter the file and therefore change the hash. The authoritative
+     hash for each release is published on the DotBip GitHub releases page:
+       https://github.com/dotbip/releases
+     Always compare the hash you compute locally against the value there.
+
+     SECURITY MODEL
+     - This file contains zero external dependencies
+     - No network requests of any kind are possible (CSP enforced)
+     - No data is stored anywhere (no localStorage, no cookies)
+     - All state lives in JavaScript variables only
+     - Closing/refreshing the tab wipes everything completely
+     - For maximum security: use on an air-gapped device,
+       boot from a live USB (e.g. Tails OS), disable Wi-Fi,
+       and open in a private/incognito browser window
+
+     USAGE
+     1. Download this single .html file
+     2. Verify the SHA-256 hash (see above)
+     3. Disconnect from the internet
+     4. Open with file:/// in any modern browser
+     5. Enter seed words using the grid or word/number input
+     6. Punch your metal backup plate
+     7. Close the tab — nothing is retained
+
+     CHANGELOG
+     v1.0.4 — Fix: grid-wrap overflow:hidden stops JS text bleed-through.
+              Fix: QR toggle label renamed to 'Seed QR'.
+              Fix: Donate button right margin matches page indicator (12px).
+              Fix: Security badge redesigned as single combined status line.
+     v1.0.5 — UI: logo now uses accent color (yellow/blue per theme).
+              UI: color picker (3-circle icon) — choose highlight color.
+              UI: light theme uses deep blue #0009ff for dots/accent.
+              UI: removed purple remnants from dark theme base.
+     v1.1.1 — UI: QR warning font 12px/800, dark red bg, red border.
+              UI: Trash icon 10% taller (viewBox height compressed).
+     v1.1.1 — UI: QR warning stretches full width of panel.
+              UI: sidebar default width 240→276px (+15%).
+              UI: trash icon square viewBox, taller proportions.
+     v1.1.1 — UI: sidebar default width 240→276px (+15%).
+     v1.1.1 — Fix: Grid Rows scroll broken (sidebar was scrolling as whole;
+              rows-section now scrolls independently with min-height:0).
+              UI: rows scrollbar matches resize handle visual style.
+     v1.1.19 — UI: WORD NUMBER label and value bumped to 11px to
+              match the security status line at the bottom of the
+              sidebar. Value still yellow.
+     v1.1.18 — UI: WORD NUMBER value at top of sidebar reduced to
+              match the label size (10px, monospace, letter-spacing
+              1.2px, weight 700). Still yellow.
+     v1.1.17 — Fix: v1.1.16 mistakenly removed the result box (word
+              number, binary, "Assign word to row" link) when only
+              one suggestion remained. Restored.
+              UX: When the user has typed enough letters to uniquely
+              disambiguate a BIP39 word (e.g. "cinna" → cinnamon),
+              the result box appears with:
+              • Yellow outline (2px solid #fff600) around the box
+              • Yellow text on the word itself
+              • A "↵ Press Enter to commit" hint line
+              • A yellow chip below for mouse users
+              UX: New Enter-to-commit. Pressing Enter in the word
+              input commits the currently-shown word (whether exact
+              or unique-prefix match) and auto-advances to the next
+              row. Combined with the auto-clear behaviour from
+              v1.1.16, the user can now enter a 24-word seed
+              entirely from the keyboard without ever touching
+              the mouse.
+     v1.1.16 — UX: Faster word entry workflow.
+              • "Assign word to row" link now clears the input,
+                hides the result panel, and advances to the next
+                row automatically (with rollover from row 12 to
+                page 2 row 1, and from row 24 back to page 1
+                row 1). User can type 24 words consecutively
+                without touching the row selector.
+              • When typing narrows the suggestions to exactly
+                ONE match, that suggestion chip turns yellow
+                (yellow border, yellow text). Clicking the
+                yellow chip commits the word to the grid and
+                advances to the next row in a single click —
+                no need to type the remaining letters.
+              UI: New WORD NUMBER indicator at the top of the
+              sidebar shows which row (1–24) is currently
+              selected. Updates whenever the selection changes.
+     v1.1.15 — UX: Two-stage Tor/Tails button on warning page.
+              First load: REFRESH TO LOAD button visible (dark gray
+              background, yellow outline, white "Tor Browser / Tails
+              only" subtitle, yellow main text). Pure HTML <a href="?r">
+              link — works without JavaScript and forces a full page
+              reload by appending ?r to the URL.
+              After refresh: location.search === '?r' triggers a
+              tiny JS swap that hides REFRESH TO LOAD and reveals
+              the original Tor/Tails button, now relabeled
+              "I AM OFFLINE" (was "I AM AIR-GAPPED").
+              Removed: big center refresh overlay (v1.1.14) — now
+              redundant since the warning page handles the first-
+              launch refresh flow.
+              Kept: small permanent refresh icon in the header
+              button row.
+     v1.1.14 — Add: Two recovery refresh buttons for fresh-Tails /
+              cold-Tor first-load case (where inline JS does not
+              execute and the grid never draws).
+              • Big center REFRESH PAGE button overlays the grid
+                area on initial load. Pure HTML <a href=""> link —
+                works without JavaScript. Auto-hidden by renderGrid()
+                when JS runs successfully (every system except
+                fresh-Tails-first-load).
+              • Small permanent refresh icon as the leftmost item
+                in the header button row. Always available for
+                manual reload.
+              Both buttons are <a> elements styled to match the
+              existing UI; no JavaScript dependency for either.
+     v1.1.13 — Fix: Definitive fix for fresh-Tails / cold-Tor first-load
+              with NO auto-refresh (v1.1.12 caused a refresh loop —
+              rolled back).
+              Diagnosis: v1.1.11's step counter staying at [0] proved
+              that inline JavaScript does not execute on the very
+              first file:// load on a fresh Tails system. Both
+              inline onclick attributes (v1.1.10) and addEventListener
+              binding (v1.1.11) require JS to run — neither works.
+              Solution: pure HTML+CSS overlay dismissal. A hidden
+              checkbox sits at the top of <body>; the overlay's
+              "I AM AIR-GAPPED" and "RETRY" buttons are <label>
+              elements that toggle this checkbox. CSS rule
+              "#overlay-dismissed:checked ~ #online-overlay {
+              display: none !important; }" hides the overlay when
+              the checkbox is checked. NO JAVASCRIPT REQUIRED for
+              the dismissal — works on any browser that supports
+              CSS sibling selectors (every browser since 2009).
+              JavaScript still listens to the checkbox 'change'
+              event for state syncing when it does run, but the
+              dismissal is no longer JS-dependent.
+     v1.1.12 — REVERTED. Auto-refresh meta tag caused infinite
+              refresh loop on systems where the inline script
+              removal didn't run.
+     v1.1.11 — Fix: Definitive fix for fresh-Tails / cold-Tor first-load
+              hang. The previous version (v1.1.10) deferred button
+              wiring until AFTER all of script #2 had finished parsing
+              (~700 lines including GF/Reed-Solomon/QR generators).
+              On a fresh Tails install something in script #2 was
+              taking 5+ minutes (or hanging entirely) before the
+              buttons were enabled — leaving the user stuck on the
+              warning page with disabled buttons.
+              Architecture: two-stage button bootstrap.
+              • Stage 1 (very TOP of script #2, runs in milliseconds):
+                wires buttons immediately with minimal fallback
+                handlers. If the rest of the script never loads, the
+                buttons still work — they just hide the overlay so
+                the user can proceed.
+              • Stage 2 (end of online-detection block): the full
+                checkOnlineStatus and _forceAirGapped become available
+                and replace the stubs via typeof checks.
+              UX: loading message now shows a step counter like
+              "[1] wiring buttons…" / "[3] GF(256) tables ready…" /
+              "[8] all systems ready ✓" so any future hang can be
+              diagnosed by reading the step number.
+              Failsafe: 5-second timer detects incomplete script load
+              and tells the user the buttons still work in fallback
+              mode. No more silent hang.
+     v1.1.10 — Fix: Definitive fix for unresponsive overlay buttons on
+              fresh Tails / cold Tor Browser boot. Root cause: the
+              overlay was rendered from HTML alone (correctly per
+              v1.1.9) and visible to the user within milliseconds —
+              but the inline onclick handlers it referenced
+              (checkOnlineStatus, _forceAirGapped) only became
+              available as globals when script #2 finished parsing
+              all 700+ lines of GF/Reed-Solomon/QR/online-detection
+              code. On a cold Tor Browser boot the user could click
+              the button BEFORE script #2 finished, and the click
+              would silently do nothing. After a refresh the file
+              was cached, parsing was instant, and the race went
+              unnoticed.
+              Fix: removed inline onclick="..." from both overlay
+              buttons. Buttons now start in HTML as disabled with
+              50% opacity and a "Loading… please wait" message
+              underneath. Script #2 binds proper addEventListener
+              handlers and enables the buttons only AFTER all
+              relevant functions (_forceAirGapped, checkOnlineStatus)
+              are fully defined. The user gets a clear visual signal
+              when the page is ready to interact with, and clicks
+              are guaranteed to fire their handlers — no race.
+     v1.1.9 — Fix: Definitive fix for Tor Browser / fresh Tails first-load
+              blank-page bug. Root causes identified:
+              (1) Browsers cannot reliably distinguish "online" from
+                  "no internet but LAN/loopback up" — Firefox and Tor
+                  Browser default navigator.onLine to true to comply
+                  with the spec, which is NOT a Tor-specific spoof.
+              (2) On Tor Browser cold starts, scripts execute before
+                  flex layout settles, so #grid-panel.clientWidth is 0
+                  and calcCellSize() produces a broken render. On the
+                  second load this race resolves before scripts run.
+              Architectural change:
+              • Online overlay now shown by DEFAULT in HTML (display:flex)
+                rather than toggled on by JS. The warning is therefore
+                guaranteed to be visible on first load even if the
+                JS engine is delayed, throttled, or partially blocked
+                by Tor's Safest mode. JS only HIDES it when offline.
+              • _tryInitialRender() now waits for window.load AND
+                verifies #grid-panel has real (>=100px) dimensions
+                before calling renderGrid(). Retries via rAF until
+                layout reports a sane size. No more cold-start race.
+              UI: Overlay heading changed from "INTERNET CONNECTION
+              DETECTED" to "SAFETY CHECK" — the warning is now shown
+              every time as a precaution, not because we detected a
+              connection.
+     v1.1.8 — UX: Word-lookup bit breakdown "(1+8+64+256)" now wraps
+              to a new line when the sidebar is too narrow, instead of
+              overflowing to the right off-screen. Uses a dedicated
+              .result-breakdown inline-block span so the breakdown
+              stays as a readable unit on its own line.
+              UI: USAGE WARNING panel header (icon, title, subtitle)
+              is now center-aligned to match all other panels.
+              Fix: Donate section no longer breaks words like
+              "Lightning", "ONLINE", "OpenNode" mid-character.
+              word-break:break-all moved from the #donate-label
+              parent to only the .donate-addr span where mid-string
+              URL breaking is genuinely needed.
+     v1.1.7 — UX: Word lookup panel now shows the bit-value breakdown
+              after the word number, e.g. "#329 (1+8+64+256)".
+              UI: Header toggle buttons reordered left→right: Verify
+              integrity, Indexing, Device guidelines, Usage warning,
+              Security, High-security tip.
+              UI: Device Guidelines — first paragraph expanded to
+              mention the single-file form; passphrase paragraph
+              removed; Tails reference updated with tails.net.
+     v1.1.6 — Fix: Tor Browser first-load blank-page bug. The init
+              IIFE was scheduling renderGrid(), then the online-detection
+              block was firing _setOnlineUI() → instantWipeAll() →
+              renderGrid() while layout was still settling, producing
+              an invisible grid. Required reload to recover.
+              Fix: single-render architecture via _tryInitialRender().
+              instantWipeAll() skips renderGrid() before initial render.
+              Startup now: if navigator.onLine === true, overlay shows
+              immediately and grid is not rendered at all until user
+              clicks RETRY or I AM AIR-GAPPED. If offline at start,
+              grid renders once after double-rAF.
+              UX: user sees either the warning overlay or the working
+              grid — never a blank page. No reload needed.
+     v1.1.5 — Fix: Overlay panels clip outside viewport on mobile/narrow
+              windows — outer wrapper padding removed, inner cards now
+              use box-sizing:border-box with safe padding via new
+              overlay-inner CSS class.
+              Fix: Laptop (Device Guidelines) button moved to far left
+              of header button row.
+              UI: Device Guidelines panel text updated per spec.
+     v1.1.4 — Fix: Grid and Seed QR button invisible on first load in
+              Tor Browser — caused by render racing with online-check
+              wipe; init now defers renderGrid until after status
+              is settled.
+              Fix: QR/Donate panels visible above full-screen panel
+              overlays on narrow/mobile viewports — z-index raised on
+              all overlay panels to sit above z-index:200.
+              Add: Tor Browser status line — when air-gapped override
+              is active, sec-badge shows red TOR BROWSER / TAILS MODE
+              warning instead of green offline message.
+              Add: Device Guidelines panel (laptop icon, top-right).
+     v1.1.3 — Fix: Tor Browser / Tails OS compatibility.
+              Fix: color-mix() replaced with rgba() fallback (Tor
+              Browser / Firefox ESR does not support color-mix()).
+              Fix: navigator.onLine spoofed to true in Tor Browser —
+              caused false online alarm, data wipe, and overlay
+              blocking all UI on load.
+              Fix: Two-tier online detection. Tier 1 (startup):
+              navigator.onLine used only for http(s)://; on file://
+              it is only trusted when it reports false (safe).
+              Tier 2 (live): window online/offline events are
+              OS-level NIC transitions — NOT spoofed by Tor Browser
+              — and fire correctly on all platforms (Windows, Linux,
+              macOS, Tails) whenever a network interface changes.
+              Note: if user opens file while already connected in
+              Tor Browser the startup check cannot detect this
+              (spoofed API, CSP blocks fetch). Tier 2 catches any
+              subsequent network-up transition immediately.
+     v1.1.2 — UI: gray dot-off-bg darkened to #151515.
+              UI: zoom-out capped at 5 steps (ZOOM_MIN=0.5).
+              Add: flame button + security/integrity panel.
+              Doc: SHA-256 verification commands for all platforms.
+     v1.1.1 — UI: sidebar rows panel shows all 24 words across both pages.
+              UI: clicking row 13-24 auto-switches grid to page 2.
+              UI: sidebar default width 276→290px (+5%).
+     v1.1.0 — Fix: donate panel border-radius mirrors Seed QR (0 6px 6px 6px).
+              Add: Seed QR safety warning shown when QR code is complete.
+     v1.0.9 — Fix: trash icon red highlight removed (stripped old #clear-btn CSS).
+              Fix: donate panel border-radius matches right-side tab geometry.
+              UI: donate QR larger (px=6, matches Seed QR scale).
+     v1.0.8 — UI: QR/Donate buttons complete border; open state becomes tab.
+              UI: Sun shown in dark mode, crescent moon in light mode.
+              UI: Proper crescent moon SVG path.
+              UI: Trash icon matches reference design (3 lines + handle).
+     v1.0.7 — Fix: row selected border tracks --accent (was hardcoded hex).
+              UI: header icons replaced with crisp SVGs, 20% larger.
+              UI: theme button shows sun in Light mode, moon in Gray mode.
+     v1.0.6 — UI: hover fill tracks --accent CSS var (all themes/colors).
+              UI: Seed QR and Donate panels always show accent border.
+              UI: zoom buttons get accent highlight on hover/press.
+              UI: donate addr text uses --accent color.
+     v1.0.5 — Fix: grid blank on load (deferred render until after layout).
+              Fix: theme switch shows stale grid (double-rAF flush).
+              UI: col/row labels same size formula and weight 900.
+     v1.0.4 — UI: header +15% taller, logo +15% larger.
+              UI: all filled dots and logo → #fff600 yellow.
+              UI: donate panel layout mirrors Seed QR panel.
+     v1.0.3 — Fix: donate JS was outside script tag, rendering as body text.
+              Fix: donate QR now correctly encodes the is.gd short URL.
+              Fix: col-header overflow causing JS source bleed through grid.
+              Fix: Courier New Bold font for row/col grid labels.
+              Fix: Donate panel repositioned to bottom-right of grid-panel.
+     v1.0.2 — Fix: column header height now scales with cell/zoom size.
+              Fix: eye icon replaced with clean distortion-free SVG.
+              Add: Donate panel (bottom-right) with Bitcoin QR code.
+     v1.0.1 — Fix: sidebar mini-dot preview now correctly reflects
+              the active grid page (page 2 / grid2) instead of
+              always reading from grid (page 1). The dot preview
+              loop in updateRowInfoList() now uses activeGrid().
+============================================================ -->
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline'; font-src data:;">
+  <title>DotBip — Offline Binary Grid v1.1.19</title>
+  <style>
+    @font-face {
+      font-family: 'DotBipMono';
+      src: local('Courier New'), local('Courier'), local('monospace');
+    }
+
+    :root {
+      --bg:         #111111;
+      --panel:      #1a1a1a;
+      --border:     #2e2e2e;
+      --divider:    #444444;
+      --accent:     #fff600;
+      --accent2:    #ffe000;
+      --dot-filled: #fff600;
+      --dot-empty:  #222222;
+      --dot-border: #333333;
+      --dot-sel:    #ffffff;
+      --text:       #e8e8e8;
+      --text-dim:   #888888;
+      --text-muted: #555555;
+      --green:      #00cc66;
+      --pink:       #ff4488;
+      --header-h:   60px;
+      --cell:       clamp(20px, 4vmin, 44px);
+      --grid-bg:    #141414;
+      --grid-line:  #2e2e2e;
+      --grid-div:   #505050;
+      --dot-on:     #fff600;
+      --dot-off-bg: #222222;
+      --dot-off-st: #333333;
+    }
+
+    body.theme-gray {
+      --bg:         #1e1e1e;
+      --panel:      #2a2a2a;
+      --border:     #3a3a3a;
+      --divider:    #505050;
+      --text:       #f0f0f0;
+      --text-dim:   #aaaaaa;
+      --text-muted: #666666;
+      --grid-bg:    #252525;
+      --grid-line:  #3a3a3a;
+      --grid-div:   #606060;
+      --dot-on:     #fff600;
+      --dot-off-bg: #333333;
+      --dot-off-st: #4a4a4a;
+      --dot-sel:    #ffffff;
+      --dot-empty:  #151515;
+    }
+
+    body.theme-light {
+      --bg:         #e8e8e8;
+      --panel:      #f0f0f0;
+      --border:     #cccccc;
+      --divider:    #aaaaaa;
+      --text:       #111111;
+      --text-dim:   #444444;
+      --text-muted: #888888;
+      --grid-bg:    #e0e0e0;
+      --grid-line:  #bbbbbb;
+      --grid-div:   #888888;
+      --dot-on:     #0009ff;
+      --dot-off-bg: #cccccc;
+      --dot-off-st: #bbbbbb;
+      --dot-sel:    #0009ff;
+      --dot-empty:  #cccccc;
+      --accent:     #0009ff;
+      --accent2:    #0055ff;
+    }
+    body.theme-light #header {
+      background: #ffffff;
+      border-bottom-color: #d0d0d0;
+    }
+    body.theme-light #sidebar {
+      background: #ffffff;
+      border-left-color: #d0d0d0;
+    }
+    body.theme-light .side-section { border-bottom-color: #e0e0e0; }
+    body.theme-light .lookup-input {
+      background: #f8f8f8; color: #111; border-color: #ccc;
+    }
+    body.theme-light .result-box { background: #f8f8f8; border-color: #ccc; }
+    body.theme-light .suggest-chip {
+      background: #eeeeee; border-color: #ccc; color: #444;
+    }
+    body.theme-light .row-info-item.selected { background: transparent; border-color: var(--accent); }
+    body.theme-light #sec-badge { border-top-color: #e0e0e0; color: #888; }
+
+    body.theme-light .header-pill {
+      background: #f0f0f0; border-color: #ccc; color: #666;
+    }
+
+    body.theme-light .eye-toggle { color: #888; }
+    body.theme-light .eye-toggle:hover { color: #0009ff; }
+
+
+    body.theme-gray .lookup-input { background: #1a1a1a; color: #f0f0f0; border-color: #3a3a3a; }
+    body.theme-gray .result-box { background: #1a1a1a; border-color: #3a3a3a; }
+    body.theme-gray .suggest-chip { background: #2a2a2a; border-color: #444; color: #aaa; }
+    body.theme-gray .row-info-item.selected { background: transparent; border-color: var(--accent); }
+
+    /* ── OVERLAY PANEL INNER CARD ── */
+    /* CSS-only overlay dismissal — when #overlay-dismissed checkbox
+       is checked, hide the warning overlay. The "I AM AIR-GAPPED"
+       label inside the overlay toggles this checkbox without any
+       JavaScript. This is the ultimate failsafe: even if every
+       script on the page fails to execute, the user can dismiss
+       the warning with one click. */
+    #overlay-dismissed:checked ~ #online-overlay {
+      display: none !important;
+    }
+    /* Style the airgap label to look exactly like the original button */
+    .airgap-label {
+      padding: 16px 32px;
+      border-radius: 8px;
+      background: #1a1a2a;
+      border: 2px solid #5566aa;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.4;
+      display: inline-block;
+      user-select: none;
+    }
+    .airgap-label:hover { background: #22223a; }
+
+    .retry-label {
+      padding: 16px 44px;
+      border-radius: 8px;
+      background: #1a2a1a;
+      border: 2px solid #22aa44;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.4;
+      display: inline-block;
+      user-select: none;
+    }
+    .retry-label:hover { background: #1f3220; }
+
+    /* REFRESH TO LOAD button — Tor / Tails first-launch workaround.
+       Dark gray background with yellow outline; white subtitle and
+       yellow main text per spec. */
+    .refresh-load-label {
+      padding: 16px 32px;
+      border-radius: 8px;
+      background: #2a2a2a;
+      border: 2px solid #fff600;
+      cursor: pointer;
+      text-align: center;
+      line-height: 1.4;
+      display: inline-block;
+      user-select: none;
+      text-decoration: none;        /* it's an <a> element */
+    }
+    .refresh-load-label:hover { background: #333333; }
+
+    .overlay-inner {
+      width: 100%;
+      min-height: 100%;
+      display: flex;
+      align-items: flex-start;
+      justify-content: center;
+      padding: 28px 16px;
+      box-sizing: border-box;
+    }
+    .overlay-card {
+      width: 100%;
+      max-width: 760px;
+      border-radius: 16px;
+      font-family: system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      width: 100%; height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Outfit', 'Segoe UI', system-ui, sans-serif;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    #header {
+      position: fixed; top: 0; left: 0; right: 0;
+      height: var(--header-h);
+      background: var(--panel);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center;
+      padding: 0 18px;
+      gap: 14px;
+      z-index: 100;
+    }
+    #logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      color: var(--accent);
+    }
+    #logo span { color: var(--text-dim); font-weight: 400; font-size: 12px; letter-spacing: 0.3px; }
+    #dotbip-logo { fill: var(--accent); }
+    body.theme-gray  #dotbip-logo { fill: var(--accent); }
+    body.theme-light #dotbip-logo { fill: var(--accent); }
+    .header-pill {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 20px;
+      background: #1e1e2e;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+    }
+    /* offline-pill replaced by sec-status-line */
+    #header-right {
+      margin-left: auto;
+      display: flex; align-items: center; gap: 10px;
+    }
+    /* #clear-btn styling handled by .hdr-btn */
+
+    #main {
+      position: fixed;
+      top: var(--header-h);
+      left: 0; right: 0; bottom: 0;
+      display: flex;
+      flex-direction: row;
+      gap: 0;
+    }
+    #grid-panel { flex: 1 1 auto; min-width: 200px; overflow: hidden; }
+    #sidebar    { flex: 0 0 var(--sidebar-w, 290px); min-width: 180px; max-width: 520px; }
+
+    #resize-handle {
+      flex: 0 0 5px;
+      background: var(--border);
+      cursor: col-resize;
+      transition: background 0.15s;
+      position: relative;
+      z-index: 50;
+    }
+    #resize-handle:hover {
+      background: var(--accent);
+    }
+
+    #grid-panel {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    #grid-wrap {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      overflow: hidden;
+    }
+
+    #grid-container {
+      display: flex;
+      flex-direction: row;
+      align-items: flex-start;
+      gap: 0;
+    }
+
+    #row-labels {
+      display: flex;
+      flex-direction: column;
+    }
+    .row-label {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 8px;
+      font-size: 11px;
+      font-family: 'Courier New', Courier, monospace;
+      color: var(--text-muted);
+      font-weight: 900;
+    }
+    .row-label.active-row { color: var(--accent); }
+
+    #grid-svg {
+      display: block;
+      cursor: pointer;
+      border-radius: 4px;
+    }
+
+    #page-indicator {
+      position: absolute;
+      top: 10px;
+      right: 12px;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      gap: 6px;
+      z-index: 10;
+    }
+    #page-squares { display: flex; gap: 5px; }
+    .page-sq {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--panel);
+      color: var(--text-dim);
+      font-size: 12px;
+      font-weight: 700;
+      font-family: monospace;
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer;
+    }
+    .page-sq.active { border-color: var(--accent); color: var(--accent); }
+    .page-sq.has-data { color: var(--accent); }
+    #page-label {
+      font-size: 9px;
+      font-family: monospace;
+      color: var(--text-muted);
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      font-weight: 700;
+    }
+
+    #col-header { display: flex; margin-left: 0; overflow: hidden; }
+    .col-head {
+      font-size: 10px;
+      font-family: 'Courier New', Courier, monospace;
+      font-weight: 900;
+      color: var(--text-muted);
+      text-align: center;
+      overflow: hidden;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    #sidebar {
+      background: var(--panel);
+      border-left: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .side-section {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .side-label {
+      font-size: 10px;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+    .side-label-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    /* ── EYE TOGGLE ── */
+    .eye-toggle {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 26px;
+      height: 26px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-muted);
+      padding: 0;
+      border-radius: 4px;
+      transition: color 0.15s;
+    }
+    .eye-toggle:hover {
+      color: var(--accent);
+    }
+    .eye-toggle svg {
+      display: block;
+      width: 18px;
+      height: 18px;
+    }
+
+    .lookup-input {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      color: var(--text);
+      font-size: 15px;
+      padding: 9px 12px;
+      outline: none;
+      font-family: inherit;
+      transition: border-color 0.15s;
+    }
+    .lookup-input:focus { border-color: var(--accent); }
+    .lookup-input.error { border-color: var(--pink); color: var(--pink); }
+    .lookup-input.valid { border-color: var(--green); }
+
+    .result-box {
+      margin-top: 8px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 10px 12px;
+      min-height: 42px;
+    }
+    .result-word {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--accent);
+      letter-spacing: 0.5px;
+    }
+    .result-meta {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+      font-family: monospace;
+      letter-spacing: 0.3px;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    /* Bit-value breakdown, e.g. "(1+8+64+256)" — wraps as an inline
+       block so it drops to the next line cleanly when the sidebar
+       is narrow, rather than overflowing to the right. */
+    .result-breakdown {
+      display: inline-block;
+      white-space: normal;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+    .result-bits {
+      font-size: 13px;
+      font-family: monospace;
+      color: var(--accent2);
+      letter-spacing: 2px;
+      margin-top: 4px;
+    }
+    .suggest-list {
+      margin-top: 6px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 5px;
+    }
+    .suggest-chip {
+      font-size: 12px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: #1e1e2e;
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      cursor: pointer;
+      transition: all 0.1s;
+    }
+    /* Highlighted state — applied when only ONE suggestion is left.
+       Yellow border + yellow text so the user knows clicking it
+       will commit the word to the grid. */
+    .suggest-chip.unique {
+      border-color: #fff600;
+      color: #fff600;
+      background: #2a2a1a;
+      font-weight: 700;
+    }
+    .suggest-chip.unique:hover { background: #3a3a1a; }
+
+    /* When the user has typed enough to uniquely disambiguate a
+       BIP39 word (but not the full word yet), the result box
+       gets a yellow outline and the word inside gets yellow text.
+       This visually signals "press Enter or click the chip to
+       commit". */
+    .result-box-unique {
+      border: 2px solid #fff600 !important;
+      box-shadow: 0 0 0 2px rgba(255, 246, 0, 0.12);
+    }
+    .result-word-unique {
+      color: #fff600 !important;
+    }
+
+    /* WORD NUMBER indicator at top of sidebar — shows the index
+       (1–24) of the currently selected row, updates whenever the
+       selection changes. */
+    .word-number-display {
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 2px 0;
+    }
+    .word-number-label {
+      font-size: 11px;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      font-weight: 700;
+    }
+    .word-number-value {
+      font-size: 11px;
+      letter-spacing: 1px;
+      font-weight: 700;
+      color: var(--accent);
+      font-family: monospace;
+    }
+
+    #row-info-list {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+    .row-page-divider {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px 2px;
+      margin: 2px 0;
+    }
+    .row-page-divider span {
+      font-size: 9px;
+      font-family: monospace;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+    .row-page-divider::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+    .row-info-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 5px 8px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.1s;
+      border: 1px solid transparent;
+    }
+    .row-info-item.selected { background: transparent; border-color: var(--accent); }
+    .row-info-num {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--text-muted);
+      width: 16px;
+      text-align: right;
+      flex-shrink: 0;
+    }
+    .row-info-word {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      flex: 1;
+      min-width: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .row-info-word.empty { color: var(--text-muted); font-weight: 400; font-style: italic; }
+    .row-info-word.hidden-word {
+      color: var(--text-muted);
+      font-weight: 400;
+      font-family: monospace;
+      letter-spacing: 2px;
+    }
+    .row-info-bits {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+    }
+    .row-dot-preview {
+      display: flex;
+      gap: 2px;
+      align-items: center;
+    }
+    .rdp { width: 5px; height: 5px; border-radius: 50%; background: var(--dot-empty); flex-shrink:0; }
+    .rdp.on { background: var(--accent); }
+    .rdp-gap { width: 4px; flex-shrink: 0; }
+
+    #sec-badge {
+      flex-shrink: 0;
+      margin-top: auto;
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      font-size: 10px;
+      color: var(--text-muted);
+      line-height: 1.7;
+      letter-spacing: 0.3px;
+    }
+    #sec-badge .badge-title {
+      color: var(--green);
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    #tooltip {
+      position: fixed;
+      pointer-events: none;
+      background: #1a1a2a;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 12px;
+      color: var(--text);
+      z-index: 999;
+      opacity: 0;
+      transition: opacity 0.1s;
+      white-space: nowrap;
+    }
+    #tooltip.show { opacity: 1; }
+
+    /* sidebar scrollbar removed — rows-section handles its own scroll */
+
+    .side-section.rows-section { overflow-y: auto; flex: 1; min-height: 0; flex-shrink: 1; }
+    .side-section.rows-section::-webkit-scrollbar { width: 6px; }
+    .side-section.rows-section::-webkit-scrollbar-track {
+      background: var(--border);
+      border-radius: 0;
+    }
+    .side-section.rows-section::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 0;
+      min-height: 32px;
+    }
+    .side-section.rows-section::-webkit-scrollbar-thumb:hover {
+      background: var(--accent);
+    }
+    .side-section.rows-section {
+      scrollbar-width: thin;
+      scrollbar-color: var(--text-muted) var(--border);
+    }
+
+    @media (max-width: 600px) {
+      html, body { overflow: auto !important; height: auto !important; }
+      #header {
+        flex-wrap: wrap;
+        height: auto;
+        min-height: var(--header-h);
+        padding: 8px 12px;
+        gap: 6px;
+        position: relative;
+      }
+      #logo { flex: 1 1 100%; min-width: 0; }
+      #logo span { font-size: 9px; }
+      #header-right {
+        flex: 1 1 100%;
+        justify-content: flex-start;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-left: 0;
+      }
+      #main {
+        position: relative;
+        top: auto; left: auto; right: auto; bottom: auto;
+        flex-direction: column;
+        height: auto;
+        overflow: visible;
+        margin-top: 0;
+      }
+      #grid-panel {
+        flex: 0 0 auto;
+        min-height: 420px;
+        height: auto;
+        padding: 42px 10px 10px;
+        overflow: hidden;
+        position: relative;
+      }
+      #resize-handle { display: none; }
+      #sidebar {
+        display: flex !important;
+        flex: 0 0 auto;
+        width: 100%;
+        max-width: 100%;
+        min-width: unset;
+        border-left: none;
+        border-top: 1px solid var(--border);
+        overflow: visible;
+        max-height: none;
+        padding-bottom: 70px;
+      }
+      .side-section.rows-section { max-height: 50vh; overflow-y: auto; }
+      #qr-panel { bottom: 14px; left: 14px; }
+      #donate-panel { bottom: 14px; right: 12px; }
+      #zoom-controls { top: 8px; left: 10px; }
+      #page-indicator { top: 8px; right: 10px; }
+    }
+
+    /* ── QR PANEL — absolute inside #grid-panel ── */
+    #qr-panel {
+      position: absolute;
+      bottom: 14px;
+      left: 14px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    #qr-toggle {
+      font-size: 11px;
+      font-family: monospace;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 5px 11px;
+      border-radius: 6px;
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      cursor: pointer;
+      position: relative;
+      z-index: 1;
+    }
+    #qr-toggle.open {
+      border-radius: 6px 6px 0 0;
+      border-bottom-color: var(--panel);
+      margin-bottom: -1px;
+      z-index: 2;
+    }
+    #qr-toggle.has-qr { color: var(--accent); border-color: var(--accent); }
+    #qr-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      border-radius: 0 6px 6px 6px;
+      padding: 12px;
+      width: 225px;
+    }
+    #qr-box.open { display: flex; }
+    #qr-box.has-qr { border-color: var(--accent); }
+    #qr-toggle.has-qr.open { border-color: var(--accent); }
+    #qr-svg-wrap {
+      background: #ffffff;
+      padding: 8px;
+      border-radius: 4px;
+      line-height: 0;
+    }
+    #qr-label {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-align: center;
+    }
+    #qr-warning {
+      display: none;
+      font-family: monospace;
+      text-align: center;
+      margin-top: 8px;
+      line-height: 1.6;
+      width: 100%;
+      background: #0f0505;
+      border: 1px solid #ff444466;
+      border-radius: 5px;
+      padding: 8px 10px;
+    }
+    #qr-warning .warn-danger {
+      color: #ff4444;
+      font-weight: 800;
+      font-size: 12px;
+      letter-spacing: 0.3px;
+      display: block;
+    }
+    #qr-warning .warn-rec {
+      color: var(--text-muted);
+      font-size: 12px;
+      display: block;
+      margin-top: 6px;
+    }
+    #qr-mode-btns { display: flex; gap: 5px; }
+    .qr-mode-btn {
+      font-size: 10px;
+      padding: 3px 9px;
+      border-radius: 4px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      cursor: pointer;
+      font-family: monospace;
+    }
+    .qr-mode-btn.active { border-color: var(--accent); color: var(--accent); }
+    body.theme-light #qr-box { background: #fff; border-color: var(--accent); }
+    body.theme-light #qr-toggle { background: #fff; border-color: var(--accent); color: var(--accent); }
+
+    /* ── DONATE PANEL — absolute inside #grid-panel, bottom-right ── */
+    #donate-panel {
+      position: absolute;
+      bottom: 14px;
+      right: 14px;
+      z-index: 200;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: flex-end;
+    }
+    #donate-toggle {
+      font-size: 11px;
+      font-family: monospace;
+      font-weight: 700;
+      letter-spacing: 0.8px;
+      text-transform: uppercase;
+      padding: 5px 11px;
+      border-radius: 6px;
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      cursor: pointer;
+      white-space: nowrap;
+      position: relative;
+      z-index: 3;
+    }
+    #donate-toggle.open {
+      border-radius: 6px 6px 0 0;
+      border-bottom-color: var(--panel);
+      margin-bottom: -1px;
+      z-index: 3;
+    }
+    #donate-box {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      background: var(--panel);
+      border: 1px solid var(--accent);
+      border-radius: 6px 0 6px 6px;
+      padding: 12px;
+      width: 225px;
+      position: relative;
+      z-index: 2;
+    }
+    #donate-box.open { display: flex; }
+    #donate-qr-wrap {
+      background: #ffffff;
+      padding: 8px;
+      border-radius: 4px;
+      line-height: 0;
+    }
+    #donate-label {
+      font-size: 10px;
+      font-family: monospace;
+      color: var(--text-muted);
+      letter-spacing: 0.5px;
+      text-align: center;
+      /* No word-break here — only .donate-addr below genuinely needs
+         mid-string breaking for the URL. Other spans (Support DotBip,
+         donate-safe, donate-url-note) wrap at whitespace only, so
+         "Lightning", "ONLINE", "OpenNode" stay intact. */
+      overflow-wrap: break-word;
+      max-width: 176px;
+      line-height: 1.5;
+    }
+    #donate-label .donate-addr {
+      color: var(--accent);
+      font-size: 9px;
+      display: block;
+      margin-top: 3px;
+      word-break: break-all;   /* URL must be able to break mid-string */
+    }
+    .donate-safe-box {
+      display: block;
+      background: #030f07;
+      border: 1px solid #00cc6655;
+      border-radius: 5px;
+      padding: 8px 10px;
+      margin-top: 8px;
+      margin-left: -12px;
+      margin-right: -12px;
+      text-align: center;
+      line-height: 1.6;
+      font-family: monospace;
+    }
+    #donate-label .donate-safe {
+      color: #00cc66;
+      font-size: 12px;
+      font-weight: 800;
+      letter-spacing: 0.3px;
+      display: block;
+    }
+    #donate-label .donate-url-note {
+      color: var(--text-muted);
+      font-size: 12px;
+      display: block;
+      margin-top: 6px;
+    }
+    body.theme-light #donate-box { background: #fff; border-color: var(--accent); border-radius: 6px 0 6px 6px; }
+    body.theme-light #donate-toggle { background: #fff; border-color: var(--accent); color: var(--accent); }
+
+    /* ── COLOR PICKER ── */
+    #color-picker-wrap {
+      position: relative;
+      display: flex;
+      align-items: center;
+    }
+    #color-btn {
+      width: 32px; height: 32px;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      display: flex; align-items: center; justify-content: center;
+      border-radius: 6px;
+      transition: background 0.15s;
+    }
+    #color-btn:hover { background: rgba(255,255,255,0.08); }
+    #color-palette {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      right: 0;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 12px;
+      gap: 8px;
+      flex-direction: column;
+      z-index: 500;
+      min-width: 140px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.4);
+    }
+    #color-palette.open { display: flex; }
+    .palette-label {
+      font-size: 9px;
+      font-family: monospace;
+      color: var(--text-muted);
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .palette-swatches {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+    }
+    .swatch {
+      width: 22px; height: 22px;
+      border-radius: 50%;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: transform 0.12s, border-color 0.12s;
+      flex-shrink: 0;
+    }
+    .swatch:hover { transform: scale(1.18); }
+    .swatch.active { border-color: #ffffff; }
+    body.theme-light .swatch.active { border-color: #333333; }
+    body.theme-light #color-palette {
+      background: #fff; border-color: #ccc;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.15);
+    }
+    body.theme-light #color-btn:hover { background: rgba(0,0,0,0.06); }
+
+    #zoom-in, #zoom-out {
+      width: 28px; height: 28px;
+      border-radius: 6px;
+      font-size: 15px; line-height: 1;
+      background: var(--panel);
+      border: 1px solid var(--border);
+      color: var(--text-dim);
+      cursor: pointer;
+      display: flex; align-items: center; justify-content: center;
+      transition: border-color 0.12s, color 0.12s;
+    }
+    #zoom-in:hover, #zoom-out:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+    #zoom-in:active, #zoom-out:active,
+    #zoom-in.pressed, #zoom-out.pressed {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(255,255,255,0.12);
+    }
+    #zoom-in:disabled, #zoom-out:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+      border-color: var(--border);
+      color: var(--text-muted);
+    }
+
+    .hdr-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px; height: 36px;
+      padding: 0;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      border-radius: 6px;
+      color: #ffffff;
+      transition: opacity 0.15s;
+      flex-shrink: 0;
+      text-decoration: none;       /* in case the element is an <a> */
+    }
+    .hdr-btn:hover { opacity: 0.7; }
+    .hdr-btn svg { display: block; }
+    body.theme-light .hdr-btn { color: #111111; }
+
+    .panel-close-btn {
+      width: 26px; height: 26px;
+      border-radius: 5px;
+      border: 1px solid var(--accent);
+      background: var(--panel);
+      color: var(--accent);
+      font-size: 14px;
+      font-weight: 700;
+      line-height: 1;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+    .panel-close-btn:hover {
+      background: var(--accent);
+      color: var(--panel);
+    }
+  </style>
+</head>
+<body>
+
+<!--
+  CSS-ONLY OVERLAY DISMISSAL (works without JavaScript)
+  ─────────────────────────────────────────────────────
+  This hidden checkbox controls the warning overlay's visibility
+  via a pure-CSS sibling selector. The "I AM AIR-GAPPED" button
+  in the overlay is a <label for="overlay-dismissed">, so clicking
+  it toggles the checkbox — no JavaScript required.
+  When the checkbox is checked, the CSS rule sets the overlay to
+  display:none. This guarantees the user can ALWAYS dismiss the
+  warning, even if every script on the page fails to execute.
+-->
+<input type="checkbox" id="overlay-dismissed" style="position:absolute;left:-9999px;" tabindex="-1" aria-hidden="true">
+
+<!-- HEADER -->
+<div id="header">
+  <div id="logo" style="display:flex;align-items:center;gap:12px;">
+    <svg id="dotbip-logo" xmlns="http://www.w3.org/2000/svg" viewBox="66 355 464 125" height="39" style="display:block;" aria-label="DotBip logo">
+      <path fill="currentColor" d="M285.18,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M285.18,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M262.7,367.24c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M262.7,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M262.7,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M262.7,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M484.99,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M507.46,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M507.46,407.34c4.86,0,8.82-3.96,8.82-8.82s-3.96-8.82-8.82-8.82-8.82,3.96-8.82,8.82,3.96,8.82,8.82,8.82Z"/>
+      <path fill="currentColor" d="M507.46,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M484.99,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M462.52,457.13c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M462.52,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M462.52,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M462.52,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M111.01,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M88.54,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M88.54,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M88.54,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M111.01,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M133.48,367.24c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M133.48,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M133.48,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M133.48,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M420.39,367.24c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <circle fill="currentColor" cx="420.39" cy="420.99" r="8.82"/>
+      <path fill="currentColor" d="M420.39,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M198.1,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M220.57,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M220.57,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M220.57,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M198.1,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M175.63,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M175.63,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M175.63,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M352.97,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M375.44,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M375.44,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M375.44,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M352.97,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M330.49,367.24c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M330.49,389.71c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M330.49,412.18c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+      <path fill="currentColor" d="M330.49,434.65c-4.86,0-8.82,3.96-8.82,8.82s3.96,8.82,8.82,8.82,8.82-3.96,8.82-8.82-3.96-8.82-8.82-8.82Z"/>
+    </svg>
+    <span style="font-size:12px;color:var(--text-dim);font-weight:400;letter-spacing:0.3px;">Offline BIP39 Based Binary Grid Dot Map — Encryption/Decryption Tool · Single HTML File · One (1) Based Indexing</span>
+  </div>
+  <div id="header-right">
+    <a id="refresh-btn" class="hdr-btn" href="" title="Reload the page (use this if anything looks stuck on first load)">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M22 14 a8 8 0 1 1 -2.5 -5.7" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" fill="none"/>
+        <polyline points="22,4 22,9 17,9" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+      </svg>
+    </a>
+    <button id="integrity-btn" class="hdr-btn" onclick="toggleIntegrityPanel()" title="Verify file integrity">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="14" cy="14" r="10" stroke="currentColor" stroke-width="2"/><polyline points="9,14 12.5,18 19,10" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+    <button id="indexing-btn" class="hdr-btn" onclick="toggleIndexingPanel()" title="Indexing system">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <line x1="10" y1="8" x2="8"  y2="20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="18" y1="8" x2="16" y2="20" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <line x1="7"  y1="12" x2="21" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <line x1="6"  y1="17" x2="20" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button id="device-btn" class="hdr-btn" onclick="toggleDevicePanel()" title="Device guidelines">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="4" y="6" width="20" height="13" rx="2" stroke="currentColor" stroke-width="2"/>
+        <path d="M2 22 H26" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <path d="M10 19 L10 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+        <path d="M18 19 L18 22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <button id="info-btn" class="hdr-btn" onclick="toggleInfoPanel()" title="Usage warning">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 3L26 24H2L14 3Z" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/>
+        <line x1="14" y1="11" x2="14" y2="17" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/>
+        <circle cx="14" cy="21" r="1.3" fill="currentColor"/>
+      </svg>
+    </button>
+    <button id="flame-btn" class="hdr-btn" onclick="toggleFlamePanel()" title="Security & about">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M14 24 C10 24 6 21 6 17 C6 13 8 11 8 11 C8 11 7.5 14 10 15 C10 15 8 10 12 5 C12 5 12 9 14 10 C14 10 15 7 14.5 4 C14.5 4 20 8 20 15 C20 15 22 13 21 10 C21 10 25 14 23 19 C22 22 19 24 14 24 Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round" fill="none"/>
+      </svg>
+    </button>
+    <button id="padlock-btn" class="hdr-btn" onclick="togglePadlockPanel()" title="High security tip">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect x="7" y="13" width="14" height="11" rx="2" stroke="currentColor" stroke-width="2"/>
+        <path d="M10 13V10a4 4 0 0 1 8 0v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+        <circle cx="14" cy="19" r="1.5" fill="currentColor"/>
+      </svg>
+    </button>
+    <button id="theme-btn" class="hdr-btn" onclick="cycleTheme()" title="Toggle theme">
+      <svg id="theme-icon" width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+<circle cx="14" cy="14" r="5.5" stroke="currentColor" stroke-width="2" fill="none"/><line x1="22.3" y1="14.0" x2="25.2" y2="14.0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="19.87" y1="19.87" x2="21.92" y2="21.92" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14.0" y1="22.3" x2="14.0" y2="25.2" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8.13" y1="19.87" x2="6.08" y2="21.92" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="5.7" y1="14.0" x2="2.8" y2="14.0" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="8.13" y1="8.13" x2="6.08" y2="6.08" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="14.0" y1="5.7" x2="14.0" y2="2.8" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><line x1="19.87" y1="8.13" x2="21.92" y2="6.08" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
+    <!-- Color picker -->
+    <div id="color-picker-wrap">
+      <button id="color-btn" onclick="toggleColorPalette()" title="Choose highlight color">
+        <svg width="26" height="26" viewBox="0 0 26 26" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="9"  cy="17" r="7" fill="#ff3333"/>
+          <circle cx="17" cy="17" r="7" fill="#2266ff"/>
+          <circle cx="13" cy="10" r="7" fill="#22cc55"/>
+        </svg>
+      </button>
+      <div id="color-palette">
+        <div class="palette-label">Highlight color</div>
+        <div class="palette-swatches">
+          <div class="swatch" data-color="#fff600" style="background:#fff600;" title="Yellow" onclick="setAccentColor('#fff600')"></div>
+          <div class="swatch" data-color="#ff6b00" style="background:#ff6b00;" title="Orange" onclick="setAccentColor('#ff6b00')"></div>
+          <div class="swatch" data-color="#ff3333" style="background:#ff3333;" title="Red" onclick="setAccentColor('#ff3333')"></div>
+          <div class="swatch" data-color="#22cc55" style="background:#22cc55;" title="Green" onclick="setAccentColor('#22cc55')"></div>
+          <div class="swatch" data-color="#2266ff" style="background:#2266ff;" title="Blue" onclick="setAccentColor('#2266ff')"></div>
+          <div class="swatch" data-color="#cc44ff" style="background:#cc44ff;" title="Purple" onclick="setAccentColor('#cc44ff')"></div>
+          <div class="swatch" data-color="#ffffff" style="background:#ffffff;" title="White" onclick="setAccentColor('#ffffff')"></div>
+          <div class="swatch" data-color="#00cccc" style="background:#00cccc;" title="Cyan" onclick="setAccentColor('#00cccc')"></div>
+        </div>
+      </div>
+    </div>
+    <button id="clear-btn" class="hdr-btn" onclick="secureWipe()" title="Wipe all data">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M10 8V6a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2" stroke="currentColor" stroke-width="2" stroke-linejoin="round" fill="none"/><line x1="3" y1="8" x2="25" y2="8" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/><rect x="5" y="8" width="18" height="17" rx="1" stroke="currentColor" stroke-width="2" fill="none"/><line x1="10" y1="12" x2="10" y2="22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="14" y1="12" x2="14" y2="22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><line x1="18" y1="12" x2="18" y2="22" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div id="main">
+  <div id="grid-panel">
+    <div id="zoom-controls" style="position:absolute;top:10px;left:14px;display:flex;gap:5px;z-index:10;">
+      <button id="zoom-out" onclick="zoomOut()" title="Zoom out">−</button>
+      <button id="zoom-in"  onclick="zoomIn()"  title="Zoom in">+</button>
+    </div>
+    <div id="page-indicator">
+      <div id="page-label">PAGE</div>
+      <div id="page-squares">
+        <div class="page-sq" id="sq-p2" onclick="switchGridPage(2)" title="Page 2: words 13–24">2</div>
+        <div class="page-sq" id="sq-p1" onclick="switchGridPage(1)" title="Page 1: words 1–12">1</div>
+      </div>
+    </div>
+    <div id="grid-wrap">
+      <div id="col-header"></div>
+      <div id="grid-container">
+        <div id="row-labels"></div>
+        <svg id="grid-svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      </div>
+    </div>
+
+    <!-- ── QR PANEL — inside grid-panel, bottom-left ── -->
+    <div id="qr-panel">
+      <button id="qr-toggle" onclick="toggleQR()"><svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;margin-right:4px;"><rect x="0" y="0" width="4" height="4"/><rect x="1" y="1" width="2" height="2" fill="var(--panel)"/><rect x="8" y="0" width="4" height="4"/><rect x="9" y="1" width="2" height="2" fill="var(--panel)"/><rect x="0" y="8" width="4" height="4"/><rect x="1" y="9" width="2" height="2" fill="var(--panel)"/><rect x="5" y="0" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="8" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="5" y="11" width="1" height="1"/><rect x="8" y="11" width="1" height="1"/><rect x="10" y="11" width="1" height="1"/></svg>Seed QR</button>
+      <div id="qr-box">
+        <div id="qr-mode-btns" style="display:flex;align-items:center;justify-content:space-between;width:100%;">
+          <div style="display:flex;gap:5px;">
+            <button class="qr-mode-btn active" id="qrm-12" onclick="setQRMode(12)">12-word</button>
+            <button class="qr-mode-btn"        id="qrm-24" onclick="setQRMode(24)">24-word</button>
+          </div>
+          <button class="panel-close-btn" onclick="toggleQR()" title="Close">✕</button>
+        </div>
+        <div id="qr-svg-wrap"><svg id="qr-svg" width="168" height="168"></svg></div>
+        <div id="qr-label">Enter words to generate QR</div>
+        <div id="qr-warning">
+          <span class="warn-danger">NEVER SCAN THIS WITH AN<br>INTERNET CONNECTED DEVICE.</span>
+          <span class="warn-rec">We recommend using a Seedsigner.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── DONATE PANEL — inside grid-panel, bottom-right ── -->
+    <div id="donate-panel">
+      <button id="donate-toggle" onclick="toggleDonate()">&#9829; Donate</button>
+      <div id="donate-box">
+        <div style="display:flex;align-items:center;justify-content:flex-start;width:100%;margin-bottom:4px;">
+          <button class="panel-close-btn" onclick="toggleDonate()" title="Close">✕</button>
+        </div>
+        <div id="donate-qr-wrap"><svg id="donate-qr-svg" width="168" height="168"></svg></div>
+        <div id="donate-label">
+          Support DotBip
+          <span class="donate-addr" id="donate-addr-text"></span>
+          <div class="donate-safe-box">
+            <span class="donate-safe">SAFE TO SCAN WITH ONLINE DEVICE</span>
+            <span class="donate-url-note">URL leads to an OpenNode window.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div id="resize-handle"></div>
+
+  <div id="sidebar">
+    <div class="side-section" id="word-number-section">
+      <div class="word-number-display">
+        <span class="word-number-label">WORD NUMBER:</span>
+        <span class="word-number-value" id="current-word-number">1</span>
+      </div>
+    </div>
+    <div class="side-section">
+      <div class="side-label">Look up by word</div>
+      <input id="word-input" class="lookup-input" type="text"
+             placeholder="e.g. abandon" autocomplete="off"
+             autocorrect="off" autocapitalize="off" spellcheck="false"
+             oninput="onWordInput(this.value)"
+             onkeydown="_onWordInputKey(event)">
+      <div id="word-suggests" class="suggest-list"></div>
+      <div id="word-result" class="result-box" style="display:none"></div>
+    </div>
+
+    <div class="side-section">
+      <div class="side-label">Look up by number</div>
+      <input id="num-input" class="lookup-input" type="number"
+             placeholder="1 – 2048" min="1" max="2048"
+             autocomplete="off" spellcheck="false"
+             oninput="onNumInput(this.value)">
+      <div id="num-result" class="result-box" style="display:none"></div>
+    </div>
+
+    <div class="side-section rows-section">
+      <div class="side-label side-label-row">
+        <span>All words 1–24 (click to select)</span>
+        <button class="eye-toggle" id="eye-toggle" onclick="toggleWordVisibility()" title="Toggle word visibility">
+          <svg id="eye-icon-open" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 5C7 5 2.5 12 2.5 12S7 19 12 19s9.5-7 9.5-7S17 5 12 5z"/>
+            <circle cx="12" cy="12" r="3"/>
+          </svg>
+          <svg id="eye-icon-closed" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" style="display:none;">
+            <path d="M12 5C7 5 2.5 12 2.5 12S7 19 12 19s9.5-7 9.5-7S17 5 12 5z"/>
+            <circle cx="12" cy="12" r="3"/>
+            <line x1="3" y1="3" x2="21" y2="21"/>
+          </svg>
+        </button>
+      </div>
+      <div id="row-info-list"></div>
+    </div>
+
+    <div id="sec-badge">
+      <div class="badge-title" id="sec-status-line">🔒 SECURITY · CHECKING…</div>
+      RAM-only · No storage · No network<br>
+      Close tab = complete wipe<br>
+      Use air-gapped device for real seeds
+    </div>
+  </div>
+</div>
+
+<div id="tooltip"></div>
+
+<script>
+'use strict';
+
+const BIP39 = [
+  'abandon','ability','able','about','above','absent','absorb','abstract','absurd','abuse',
+  'access','accident','account','accuse','achieve','acid','acoustic','acquire','across','act',
+  'action','actor','actress','actual','adapt','add','addict','address','adjust','admit',
+  'adult','advance','advice','aerobic','affair','afford','afraid','again','age','agent',
+  'agree','ahead','aim','air','airport','aisle','alarm','album','alcohol','alert',
+  'alien','all','alley','allow','almost','alone','alpha','already','also','alter',
+  'always','amateur','amazing','among','amount','amused','analyst','anchor','ancient','anger',
+  'angle','angry','animal','ankle','announce','annual','another','answer','antenna','antique',
+  'anxiety','any','apart','apology','appear','apple','approve','april','arch','arctic',
+  'area','arena','argue','arm','armed','armor','army','around','arrange','arrest',
+  'arrive','arrow','art','artefact','artist','artwork','ask','aspect','assault','asset',
+  'assist','assume','asthma','athlete','atom','attack','attend','attitude','attract','auction',
+  'audit','august','aunt','author','auto','autumn','average','avocado','avoid','awake',
+  'aware','away','awesome','awful','awkward','axis','baby','bachelor','bacon','badge',
+  'bag','balance','balcony','ball','bamboo','banana','banner','bar','barely','bargain',
+  'barrel','base','basic','basket','battle','beach','bean','beauty','because','become',
+  'beef','before','begin','behave','behind','believe','below','belt','bench','benefit',
+  'best','betray','better','between','beyond','bicycle','bid','bike','bind','biology',
+  'bird','birth','bitter','black','blade','blame','blanket','blast','bleak','bless',
+  'blind','blood','blossom','blouse','blue','blur','blush','board','boat','body',
+  'boil','bomb','bone','bonus','book','boost','border','boring','borrow','boss',
+  'bottom','bounce','box','boy','bracket','brain','brand','brass','brave','bread',
+  'breeze','brick','bridge','brief','bright','bring','brisk','broccoli','broken','bronze',
+  'broom','brother','brown','brush','bubble','buddy','budget','buffalo','build','bulb',
+  'bulk','bullet','bundle','bunker','burden','burger','burst','bus','business','busy',
+  'butter','buyer','buzz','cabbage','cabin','cable','cactus','cage','cake','call',
+  'calm','camera','camp','can','canal','cancel','candy','cannon','canoe','canvas',
+  'canyon','capable','capital','captain','car','carbon','card','cargo','carpet','carry',
+  'cart','case','cash','casino','castle','casual','cat','catalog','catch','category',
+  'cattle','caught','cause','caution','cave','ceiling','celery','cement','census','century',
+  'cereal','certain','chair','chalk','champion','change','chaos','chapter','charge','chase',
+  'chat','cheap','check','cheese','chef','cherry','chest','chicken','chief','child',
+  'chimney','choice','choose','chronic','chuckle','chunk','churn','cigar','cinnamon','circle',
+  'citizen','city','civil','claim','clap','clarify','claw','clay','clean','clerk',
+  'clever','click','client','cliff','climb','clinic','clip','clock','clog','close',
+  'cloth','cloud','clown','club','clump','cluster','clutch','coach','coast','coconut',
+  'code','coffee','coil','coin','collect','color','column','combine','come','comfort',
+  'comic','common','company','concert','conduct','confirm','congress','connect','consider','control',
+  'convince','cook','cool','copper','copy','coral','core','corn','correct','cost',
+  'cotton','couch','country','couple','course','cousin','cover','coyote','crack','cradle',
+  'craft','cram','crane','crash','crater','crawl','crazy','cream','credit','creek',
+  'crew','cricket','crime','crisp','critic','crop','cross','crouch','crowd','crucial',
+  'cruel','cruise','crumble','crunch','crush','cry','crystal','cube','culture','cup',
+  'cupboard','curious','current','curtain','curve','cushion','custom','cute','cycle','dad',
+  'damage','damp','dance','danger','daring','dash','daughter','dawn','day','deal',
+  'debate','debris','decade','december','decide','decline','decorate','decrease','deer','defense',
+  'define','defy','degree','delay','deliver','demand','demise','denial','dentist','deny',
+  'depart','depend','deposit','depth','deputy','derive','describe','desert','design','desk',
+  'despair','destroy','detail','detect','develop','device','devote','diagram','dial','diamond',
+  'diary','dice','diesel','diet','differ','digital','dignity','dilemma','dinner','dinosaur',
+  'direct','dirt','disagree','discover','disease','dish','dismiss','disorder','display','distance',
+  'divert','divide','divorce','dizzy','doctor','document','dog','doll','dolphin','domain',
+  'donate','donkey','donor','door','dose','double','dove','draft','dragon','drama',
+  'drastic','draw','dream','dress','drift','drill','drink','drip','drive','drop',
+  'drum','dry','duck','dumb','dune','during','dust','dutch','duty','dwarf',
+  'dynamic','eager','eagle','early','earn','earth','easily','east','easy','echo',
+  'ecology','economy','edge','edit','educate','effort','egg','eight','either','elbow',
+  'elder','electric','elegant','element','elephant','elevator','elite','else','embark','embody',
+  'embrace','emerge','emotion','employ','empower','empty','enable','enact','end','endless',
+  'endorse','enemy','energy','enforce','engage','engine','enhance','enjoy','enlist','enough',
+  'enrich','enroll','ensure','enter','entire','entry','envelope','episode','equal','equip',
+  'era','erase','erode','erosion','error','erupt','escape','essay','essence','estate',
+  'eternal','ethics','evidence','evil','evoke','evolve','exact','example','excess','exchange',
+  'excite','exclude','excuse','execute','exercise','exhaust','exhibit','exile','exist','exit',
+  'exotic','expand','expect','expire','explain','expose','express','extend','extra','eye',
+  'eyebrow','fabric','face','faculty','fade','faint','faith','fall','false','fame',
+  'family','famous','fan','fancy','fantasy','farm','fashion','fat','fatal','father',
+  'fatigue','fault','favorite','feature','february','federal','fee','feed','feel','female',
+  'fence','festival','fetch','fever','few','fiber','fiction','field','figure','file',
+  'film','filter','final','find','fine','finger','finish','fire','firm','first',
+  'fiscal','fish','fit','fitness','fix','flag','flame','flash','flat','flavor',
+  'flee','flight','flip','float','flock','floor','flower','fluid','flush','fly',
+  'foam','focus','fog','foil','fold','follow','food','foot','force','forest',
+  'forget','fork','fortune','forum','forward','fossil','foster','found','fox','fragile',
+  'frame','frequent','fresh','friend','fringe','frog','front','frost','frown','frozen',
+  'fruit','fuel','fun','funny','furnace','fury','future','gadget','gain','galaxy',
+  'gallery','game','gap','garage','garbage','garden','garlic','garment','gas','gasp',
+  'gate','gather','gauge','gaze','general','genius','genre','gentle','genuine','gesture',
+  'ghost','giant','gift','giggle','ginger','giraffe','girl','give','glad','glance',
+  'glare','glass','glide','glimpse','globe','gloom','glory','glove','glow','glue',
+  'goat','goddess','gold','good','goose','gorilla','gospel','gossip','govern','gown',
+  'grab','grace','grain','grant','grape','grass','gravity','great','green','grid',
+  'grief','grit','grocery','group','grow','grunt','guard','guess','guide','guilt',
+  'guitar','gun','gym','habit','hair','half','hammer','hamster','hand','happy',
+  'harbor','hard','harsh','harvest','hat','have','hawk','hazard','head','health',
+  'heart','heavy','hedgehog','height','hello','helmet','help','hen','hero','hidden',
+  'high','hill','hint','hip','hire','history','hobby','hockey','hold','hole',
+  'holiday','hollow','home','honey','hood','hope','horn','horror','horse','hospital',
+  'host','hotel','hour','hover','hub','huge','human','humble','humor','hundred',
+  'hungry','hunt','hurdle','hurry','hurt','husband','hybrid','ice','icon','idea',
+  'identify','idle','ignore','ill','illegal','illness','image','imitate','immense','immune',
+  'impact','impose','improve','impulse','inch','include','income','increase','index','indicate',
+  'indoor','industry','infant','inflict','inform','inhale','inherit','initial','inject','injury',
+  'inmate','inner','innocent','input','inquiry','insane','insect','inside','inspire','install',
+  'intact','interest','into','invest','invite','involve','iron','island','isolate','issue',
+  'item','ivory','jacket','jaguar','jar','jazz','jealous','jeans','jelly','jewel',
+  'job','join','joke','journey','joy','judge','juice','jump','jungle','junior',
+  'junk','just','kangaroo','keen','keep','ketchup','key','kick','kid','kidney',
+  'kind','kingdom','kiss','kit','kitchen','kite','kitten','kiwi','knee','knife',
+  'knock','know','lab','label','labor','ladder','lady','lake','lamp','language',
+  'laptop','large','later','latin','laugh','laundry','lava','law','lawn','lawsuit',
+  'layer','lazy','leader','leaf','learn','leave','lecture','left','leg','legal',
+  'legend','leisure','lemon','lend','length','lens','leopard','lesson','letter','level',
+  'liar','liberty','library','license','life','lift','light','like','limb','limit',
+  'link','lion','liquid','list','little','live','lizard','load','loan','lobster',
+  'local','lock','logic','lonely','long','loop','lottery','loud','lounge','love',
+  'loyal','lucky','luggage','lumber','lunar','lunch','luxury','lyrics','machine','mad',
+  'magic','magnet','maid','mail','main','major','make','mammal','man','manage',
+  'mandate','mango','mansion','manual','maple','marble','march','margin','marine','market',
+  'marriage','mask','mass','master','match','material','math','matrix','matter','maximum',
+  'maze','meadow','mean','measure','meat','mechanic','medal','media','melody','melt',
+  'member','memory','mention','menu','mercy','merge','merit','merry','mesh','message',
+  'metal','method','middle','midnight','milk','million','mimic','mind','minimum','minor',
+  'minute','miracle','mirror','misery','miss','mistake','mix','mixed','mixture','mobile',
+  'model','modify','mom','moment','monitor','monkey','monster','month','moon','moral',
+  'more','morning','mosquito','mother','motion','motor','mountain','mouse','move','movie',
+  'much','muffin','mule','multiply','muscle','museum','mushroom','music','must','mutual',
+  'myself','mystery','myth','naive','name','napkin','narrow','nasty','nation','nature',
+  'near','neck','need','negative','neglect','neither','nephew','nerve','nest','net',
+  'network','neutral','never','news','next','nice','night','noble','noise','nominee',
+  'noodle','normal','north','nose','notable','note','nothing','notice','novel','now',
+  'nuclear','number','nurse','nut','oak','obey','object','oblige','obscure','observe',
+  'obtain','obvious','occur','ocean','october','odor','off','offer','office','often',
+  'oil','okay','old','olive','olympic','omit','once','one','onion','online',
+  'only','open','opera','opinion','oppose','option','orange','orbit','orchard','order',
+  'ordinary','organ','orient','original','orphan','ostrich','other','outdoor','outer','output',
+  'outside','oval','oven','over','own','owner','oxygen','oyster','ozone','pact',
+  'paddle','page','pair','palace','palm','panda','panel','panic','panther','paper',
+  'parade','parent','park','parrot','party','pass','patch','path','patient','patrol',
+  'pattern','pause','pave','payment','peace','peanut','pear','peasant','pelican','pen',
+  'penalty','pencil','people','pepper','perfect','permit','person','pet','phone','photo',
+  'phrase','physical','piano','picnic','picture','piece','pig','pigeon','pill','pilot',
+  'pink','pioneer','pipe','pistol','pitch','pizza','place','planet','plastic','plate',
+  'play','please','pledge','pluck','plug','plunge','poem','poet','point','polar',
+  'pole','police','pond','pony','pool','popular','portion','position','possible','post',
+  'potato','pottery','poverty','powder','power','practice','praise','predict','prefer','prepare',
+  'present','pretty','prevent','price','pride','primary','print','priority','prison','private',
+  'prize','problem','process','produce','profit','program','project','promote','proof','property',
+  'prosper','protect','proud','provide','public','pudding','pull','pulp','pulse','pumpkin',
+  'punch','pupil','puppy','purchase','purity','purpose','purse','push','put','puzzle',
+  'pyramid','quality','quantum','quarter','question','quick','quit','quiz','quote','rabbit',
+  'raccoon','race','rack','radar','radio','rail','rain','raise','rally','ramp',
+  'ranch','random','range','rapid','rare','rate','rather','raven','raw','razor',
+  'ready','real','reason','rebel','rebuild','recall','receive','recipe','record','recycle',
+  'reduce','reflect','reform','refuse','region','regret','regular','reject','relax','release',
+  'relief','rely','remain','remember','remind','remove','render','renew','rent','reopen',
+  'repair','repeat','replace','report','require','rescue','resemble','resist','resource','response',
+  'result','retire','retreat','return','reunion','reveal','review','reward','rhythm','rib',
+  'ribbon','rice','rich','ride','ridge','rifle','right','rigid','ring','riot',
+  'ripple','risk','ritual','rival','river','road','roast','robot','robust','rocket',
+  'romance','roof','rookie','room','rose','rotate','rough','round','route','royal',
+  'rubber','rude','rug','rule','run','runway','rural','sad','saddle','sadness',
+  'safe','sail','salad','salmon','salon','salt','salute','same','sample','sand',
+  'satisfy','satoshi','sauce','sausage','save','say','scale','scan','scare','scatter',
+  'scene','scheme','school','science','scissors','scorpion','scout','scrap','screen','script',
+  'scrub','sea','search','season','seat','second','secret','section','security','seed',
+  'seek','segment','select','sell','seminar','senior','sense','sentence','series','service',
+  'session','settle','setup','seven','shadow','shaft','shallow','share','shed','shell',
+  'sheriff','shield','shift','shine','ship','shiver','shock','shoe','shoot','shop',
+  'short','shoulder','shove','shrimp','shrug','shuffle','shy','sibling','sick','side',
+  'siege','sight','sign','silent','silk','silly','silver','similar','simple','since',
+  'sing','siren','sister','situate','six','size','skate','sketch','ski','skill',
+  'skin','skirt','skull','slab','slam','sleep','slender','slice','slide','slight',
+  'slim','slogan','slot','slow','slush','small','smart','smile','smoke','smooth',
+  'snack','snake','snap','sniff','snow','soap','soccer','social','sock','soda',
+  'soft','solar','soldier','solid','solution','solve','someone','song','soon','sorry',
+  'sort','soul','sound','soup','source','south','space','spare','spatial','spawn',
+  'speak','special','speed','spell','spend','sphere','spice','spider','spike','spin',
+  'spirit','split','spoil','sponsor','spoon','sport','spot','spray','spread','spring',
+  'spy','square','squeeze','squirrel','stable','stadium','staff','stage','stairs','stamp',
+  'stand','start','state','stay','steak','steel','stem','step','stereo','stick',
+  'still','sting','stock','stomach','stone','stool','story','stove','strategy','street',
+  'strike','strong','struggle','student','stuff','stumble','style','subject','submit','subway',
+  'success','such','sudden','suffer','sugar','suggest','suit','summer','sun','sunny',
+  'sunset','super','supply','supreme','sure','surface','surge','surprise','surround','survey',
+  'suspect','sustain','swallow','swamp','swap','swarm','swear','sweet','swift','swim',
+  'swing','switch','sword','symbol','symptom','syrup','system','table','tackle','tag',
+  'tail','talent','talk','tank','tape','target','task','taste','tattoo','taxi',
+  'teach','team','tell','ten','tenant','tennis','tent','term','test','text',
+  'thank','that','theme','then','theory','there','they','thing','this','thought',
+  'three','thrive','throw','thumb','thunder','ticket','tide','tiger','tilt','timber',
+  'time','tiny','tip','tired','tissue','title','toast','tobacco','today','toddler',
+  'toe','together','toilet','token','tomato','tomorrow','tone','tongue','tonight','tool',
+  'tooth','top','topic','topple','torch','tornado','tortoise','toss','total','tourist',
+  'toward','tower','town','toy','track','trade','traffic','tragic','train','transfer',
+  'trap','trash','travel','tray','treat','tree','trend','trial','tribe','trick',
+  'trigger','trim','trip','trophy','trouble','truck','true','truly','trumpet','trust',
+  'truth','try','tube','tuition','tumble','tuna','tunnel','turkey','turn','turtle',
+  'twelve','twenty','twice','twin','twist','two','type','typical','ugly','umbrella',
+  'unable','unaware','uncle','uncover','under','undo','unfair','unfold','unhappy','uniform',
+  'unique','unit','universe','unknown','unlock','until','unusual','unveil','update','upgrade',
+  'uphold','upon','upper','upset','urban','urge','usage','use','used','useful',
+  'useless','usual','utility','vacant','vacuum','vague','valid','valley','valve','van',
+  'vanish','vapor','various','vast','vault','vehicle','velvet','vendor','venture','venue',
+  'verb','verify','version','very','vessel','veteran','viable','vibrant','vicious','victory',
+  'video','view','village','vintage','violin','virtual','virus','visa','visit','visual',
+  'vital','vivid','vocal','voice','void','volcano','volume','vote','voyage','wage',
+  'wagon','wait','walk','wall','walnut','want','warfare','warm','warrior','wash',
+  'wasp','waste','water','wave','way','wealth','weapon','wear','weasel','weather',
+  'web','wedding','weekend','weird','welcome','west','wet','whale','what','wheat',
+  'wheel','when','where','whip','whisper','wide','width','wife','wild','will',
+  'win','window','wine','wing','wink','winner','winter','wire','wisdom','wise',
+  'wish','witness','wolf','woman','wonder','wood','wool','word','work','world',
+  'worry','worth','wrap','wreck','wrestle','wrist','write','wrong','yard','year',
+  'yellow','you','young','youth','zebra','zero','zone','zoo'
+];
+
+// ── STATE ───────────────────────────────────────────────────
+const COLS = 12;
+const ROWS = 12;
+const BIT_VALUES = [2048, 1024, 512, 256, 128, 64, 32, 16, 8, 4, 2, 1];
+
+let grid  = Array.from({length: ROWS}, () => new Array(COLS).fill(false));
+let grid2 = Array.from({length: ROWS}, () => new Array(COLS).fill(false));
+let gridPage = 1;
+let selRow = 0;
+let selCol = 0;
+let cellSize = 36;
+let zoomLevel = 1.0;
+const ZOOM_STEP = 0.1;
+const ZOOM_MIN  = 0.5;
+const ZOOM_MAX  = 1.0;
+let _hoverFill    = 'var(--accent)';
+let _hoverOpacity = '0.18';
+let wordsHidden = false;
+
+// ── WORD VISIBILITY TOGGLE ──────────────────────────────────
+function toggleWordVisibility() {
+  wordsHidden = !wordsHidden;
+  const openIcon   = document.getElementById('eye-icon-open');
+  const closedIcon = document.getElementById('eye-icon-closed');
+  openIcon.style.display   = wordsHidden ? 'none'  : 'block';
+  closedIcon.style.display = wordsHidden ? 'block' : 'none';
+  updateRowInfoList();
+}
+
+function maskWord(word) {
+  if (!word) return null;
+  return '*'.repeat(word.length);
+}
+
+// ── RESPONSIVE CELL SIZE ────────────────────────────────────
+function calcCellSize() {
+  const panel = document.getElementById('grid-panel');
+  const pw = panel.clientWidth  - 80;
+  const ph = panel.clientHeight - 60;
+  const byWidth  = Math.floor(pw / COLS);
+  const byHeight = Math.floor(ph / ROWS);
+  const maxFit = Math.max(18, Math.min(byWidth, byHeight, 56));
+  cellSize = Math.max(18, Math.round(maxFit * zoomLevel));
+}
+
+function _flashBtn(id) {
+  const b = document.getElementById(id);
+  if (!b) return;
+  b.classList.add('pressed');
+  setTimeout(() => b.classList.remove('pressed'), 160);
+}
+function zoomIn() {
+  zoomLevel = Math.min(ZOOM_MAX, parseFloat((zoomLevel + ZOOM_STEP).toFixed(2)));
+  updateZoomBtns();
+  _flashBtn('zoom-in');
+  renderGrid();
+}
+function zoomOut() {
+  zoomLevel = Math.max(ZOOM_MIN, parseFloat((zoomLevel - ZOOM_STEP).toFixed(2)));
+  updateZoomBtns();
+  _flashBtn('zoom-out');
+  renderGrid();
+}
+function updateZoomBtns() {
+  const btnIn  = document.getElementById('zoom-in');
+  const btnOut = document.getElementById('zoom-out');
+  if (btnIn)  btnIn.disabled  = zoomLevel >= ZOOM_MAX;
+  if (btnOut) btnOut.disabled = zoomLevel <= ZOOM_MIN;
+}
+
+// ── WORD ↔ BITS ──────────────────────────────────────────────
+function wordToIndex(word) {
+  return BIP39.indexOf(word.toLowerCase().trim());
+}
+
+function indexToBits(idx) {
+  if (idx < 0 || idx > 2047) return new Array(COLS).fill(false);
+  const wordNum = idx + 1;
+  const bits = new Array(COLS).fill(false);
+  for (let c = 0; c < COLS; c++) {
+    bits[c] = !!(wordNum & BIT_VALUES[c]);
+  }
+  return bits;
+}
+
+function bitsToIndex(rowBits) {
+  let wordNum = 0;
+  for (let c = 0; c < COLS; c++) {
+    if (rowBits[c]) wordNum += BIT_VALUES[c];
+  }
+  if (wordNum === 0) return -1;
+  return wordNum - 1;
+}
+
+function rowWord(row) {
+  const idx = bitsToIndex(grid[row]);
+  if (idx < 0) return null;
+  return BIP39[idx] || null;
+}
+
+function rowBitsStr(row) {
+  return grid[row].map(b => b ? '1' : '0').join('');
+}
+
+function setRowFromWord(row, word) {
+  const idx = wordToIndex(word);
+  if (idx < 0) return false;
+  grid[row] = indexToBits(idx);
+  return true;
+}
+
+function activeGrid() { return gridPage === 1 ? grid : grid2; }
+
+function toggleCell(row, col) {
+  const g = activeGrid();
+  if (col === 0) {
+    const newVal = !g[row][0];
+    g[row] = new Array(COLS).fill(false);
+    g[row][0] = newVal;
+  } else {
+    if (g[row][0]) g[row][0] = false;
+    g[row][col] = !g[row][col];
+  }
+}
+
+// ── SVG RENDER ───────────────────────────────────────────────
+const svg = document.getElementById('grid-svg');
+const rowLabels = document.getElementById('row-labels');
+const colHeader = document.getElementById('col-header');
+
+function renderGrid() {
+  // Update WORD NUMBER indicator — reflects which row (1–24)
+  // is currently selected, taking the active grid page into account.
+  try {
+    const _wn = document.getElementById('current-word-number');
+    if (_wn) _wn.textContent = selRow + (gridPage === 1 ? 1 : 13);
+  } catch (e) { /* ignore */ }
+
+  calcCellSize();
+  const C = cellSize;
+  const W = COLS * C;
+  const H = ROWS * C;
+  const r = Math.round(C * 0.28);
+  const DIVIDER_W = 2;
+
+  _hoverFill    = 'var(--accent)'; // always tracks CSS --accent
+  _hoverOpacity = '0.18';
+
+  svg.setAttribute('width', W);
+  svg.setAttribute('height', H);
+  svg.setAttribute('viewBox', `0 0 ${W} ${H}`);
+
+  rowLabels.innerHTML = '';
+  for (let row = 0; row < ROWS; row++) {
+    const lbl = document.createElement('div');
+    lbl.className = 'row-label' + (row === selRow ? ' active-row' : '');
+    lbl.style.height = C + 'px';
+    lbl.style.fontSize = Math.max(11, C * 0.30) + 'px';
+    lbl.style.fontFamily = "'Courier New', Courier, monospace";
+    lbl.style.fontWeight = '900';
+    lbl.style.cursor = 'pointer';
+    lbl.textContent = gridPage === 1 ? row + 1 : row + 13;
+    lbl.onclick = (function(r) {
+      return function() { selRow = r; selCol = 0; renderGrid(); syncWordInput(); };
+    })(row);
+    rowLabels.appendChild(lbl);
+  }
+
+  colHeader.innerHTML = '';
+  colHeader.style.marginLeft = rowLabels.offsetWidth + 'px';
+  for (let col = 0; col < COLS; col++) {
+    const h = document.createElement('div');
+    h.className = 'col-head';
+    h.style.width = C + 'px';
+    const colH = Math.max(14, Math.min(20, Math.round(C * 0.30)));
+    h.style.height = colH + 'px';
+    h.style.lineHeight = colH + 'px';
+    h.style.fontSize = Math.max(11, C * 0.30) + 'px';
+    h.style.fontFamily = "'Courier New', Courier, monospace";
+    h.style.fontWeight = '900';
+    h.style.overflow = 'hidden';
+    h.style.textOverflow = 'clip';
+    h.style.maxWidth = C + 'px';
+    h.textContent = BIT_VALUES[col];
+    colHeader.appendChild(h);
+  }
+
+  let out = '';
+  out += `<rect width="${W}" height="${H}" fill="${getCSS('--grid-bg')}" rx="4"/>`;
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      out += `<rect id="hv-${row}-${col}" x="${col*C+1}" y="${row*C+1}" `
+           + `width="${C-2}" height="${C-2}" fill="${_hoverFill}" opacity="0" rx="2"/>`;
+    }
+  }
+
+  for (let col = 1; col < COLS; col++) {
+    const x = col * C;
+    out += `<line x1="${x}" y1="0" x2="${x}" y2="${H}" stroke="${getCSS('--grid-line')}" stroke-width="1"/>`;
+  }
+  for (let row = 1; row < ROWS; row++) {
+    const y = row * C;
+    out += `<line x1="0" y1="${y}" x2="${W}" y2="${y}" stroke="${getCSS('--grid-line')}" stroke-width="1"/>`;
+  }
+
+  out += `<rect x="1" y="1" width="${W-2}" height="${H-2}" fill="none" stroke="${getCSS('--grid-div')}" stroke-width="2" rx="3"/>`;
+
+  out += `<line x1="${4*C}" y1="0" x2="${4*C}" y2="${H}" stroke="${getCSS('--grid-div')}" stroke-width="${DIVIDER_W}"/>`;
+  out += `<line x1="${8*C}" y1="0" x2="${8*C}" y2="${H}" stroke="${getCSS('--grid-div')}" stroke-width="${DIVIDER_W}"/>`;
+  out += `<line x1="0" y1="${4*C}" x2="${W}" y2="${4*C}" stroke="${getCSS('--grid-div')}" stroke-width="${DIVIDER_W}"/>`;
+  out += `<line x1="0" y1="${8*C}" x2="${W}" y2="${8*C}" stroke="${getCSS('--grid-div')}" stroke-width="${DIVIDER_W}"/>`;
+
+  for (let row = 0; row < ROWS; row++) {
+    for (let col = 0; col < COLS; col++) {
+      const cx = col * C + C / 2;
+      const cy = row * C + C / 2;
+      const filled = activeGrid()[row][col];
+      if (filled) {
+        out += `<circle cx="${cx}" cy="${cy}" r="${r}" fill="${getCSS('--dot-on')}"/>`;
+      } else {
+        out += `<circle cx="${cx}" cy="${cy}" r="${r*0.65}" fill="${getCSS('--dot-off-bg')}"/>`;
+      }
+    }
+  }
+
+  svg.innerHTML = out;
+  updateRowInfoList();
+  updatePageIndicator();
+  refreshLookupResults();
+  if (typeof updateQR === 'function') updateQR();
+}
+
+svg.addEventListener('click', function(e) {
+  const rect = svg.getBoundingClientRect();
+  const x = e.clientX - rect.left;
+  const y = e.clientY - rect.top;
+  const col = Math.floor(x / cellSize);
+  const row = Math.floor(y / cellSize);
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) return;
+  selRow = row;
+  selCol = col;
+  toggleCell(row, col);
+  renderGrid();
+  syncWordInput();
+});
+
+let _hvRow = -1, _hvCol = -1;
+
+svg.addEventListener('mousemove', function(e) {
+  const rect = svg.getBoundingClientRect();
+  const col = Math.floor((e.clientX - rect.left)  / cellSize);
+  const row = Math.floor((e.clientY - rect.top)   / cellSize);
+  if (_hvRow >= 0) {
+    const prev = document.getElementById('hv-' + _hvRow + '-' + _hvCol);
+    if (prev) prev.setAttribute('opacity', '0');
+  }
+  if (col < 0 || col >= COLS || row < 0 || row >= ROWS) {
+    _hvRow = -1; return;
+  }
+  const hv = document.getElementById('hv-' + row + '-' + col);
+  if (hv) hv.setAttribute('opacity', _hoverOpacity);
+  _hvRow = row; _hvCol = col;
+});
+
+svg.addEventListener('mouseleave', function() {
+  if (_hvRow >= 0) {
+    const prev = document.getElementById('hv-' + _hvRow + '-' + _hvCol);
+    if (prev) prev.setAttribute('opacity', '0');
+    _hvRow = -1;
+  }
+});
+
+document.addEventListener('keydown', function(e) {
+  if (document.activeElement.tagName === 'INPUT') return;
+  switch (e.key) {
+    case 'ArrowRight': selCol = Math.min(COLS - 1, selCol + 1); break;
+    case 'ArrowLeft':  selCol = Math.max(0, selCol - 1);        break;
+    case 'ArrowDown':  selRow = Math.min(ROWS - 1, selRow + 1); break;
+    case 'ArrowUp':    selRow = Math.max(0, selRow - 1);        break;
+    case ' ':
+    case 'Enter':
+      e.preventDefault();
+      toggleCell(selRow, selCol);
+      syncWordInput();
+      break;
+    case 'Delete':
+    case 'Backspace':
+      activeGrid()[selRow] = new Array(COLS).fill(false);
+      syncWordInput();
+      break;
+    default: return;
+  }
+  renderGrid();
+});
+
+// ── ROW INFO LIST ────────────────────────────────────────────
+function updateRowInfoList() {
+  const list = document.getElementById('row-info-list');
+  list.innerHTML = '';
+
+  for (let pageNum = 1; pageNum <= 2; pageNum++) {
+    const divider = document.createElement('div');
+    divider.className = 'row-page-divider';
+    const dvLabel = document.createElement('span');
+    dvLabel.textContent = pageNum === 1 ? 'Words 1–12' : 'Words 13–24';
+    divider.appendChild(dvLabel);
+    list.appendChild(divider);
+
+    const g = pageNum === 1 ? grid : grid2;
+
+    for (let row = 0; row < ROWS; row++) {
+      const idx = bitsToIndex(g[row]);
+      const word = idx >= 0 ? BIP39[idx] : null;
+      const hasData = idx >= 0;
+      const displayWord = wordsHidden ? maskWord(word) : word;
+      const dispNum = pageNum === 1 ? row + 1 : row + 13;
+
+      const isSelected = (row === selRow && pageNum === gridPage);
+
+      const item = document.createElement('div');
+      item.className = 'row-info-item' + (isSelected ? ' selected' : '');
+
+      item.onclick = (function(r, pg) {
+        return function() {
+          if (pg !== gridPage) {
+            gridPage = pg;
+            const wi = document.getElementById('word-input');
+            const wr = document.getElementById('word-result');
+            if (wi) wi.value = '';
+            if (wr) wr.style.display = 'none';
+          }
+          selRow = r; selCol = 0;
+          renderGrid();
+          syncWordInput();
+        };
+      })(row, pageNum);
+
+      const preview = document.createElement('div');
+      preview.className = 'row-dot-preview';
+      for (let c = 0; c < COLS; c++) {
+        if (c === 4 || c === 8) {
+          const gap = document.createElement('div');
+          gap.className = 'rdp-gap';
+          preview.appendChild(gap);
+        }
+        const d = document.createElement('div');
+        d.className = 'rdp' + (g[row][c] ? ' on' : '');
+        preview.appendChild(d);
+      }
+
+      let wordClass = 'row-info-word';
+      if (!word)          wordClass += ' empty';
+      else if (wordsHidden) wordClass += ' hidden-word';
+
+      item.innerHTML = `
+        <span class="row-info-num">${dispNum}</span>
+        <span class="${wordClass}">${displayWord || 'empty'}</span>
+      `;
+      if (hasData && !wordsHidden) {
+        const meta = document.createElement('span');
+        meta.className = 'row-info-bits';
+        meta.style.fontSize = '9px';
+        meta.textContent = '#' + (idx + 1);
+        item.appendChild(meta);
+      }
+      item.appendChild(preview);
+      list.appendChild(item);
+    }
+  }
+}
+
+// ── WORD INPUT LOOKUP ────────────────────────────────────────
+//
+// _pendingCommitIdx: if non-null, pressing Enter in the word
+// input will commit this BIP39 index to the current row. It is
+// set whenever we display either an exact match OR a single
+// suggestion that uniquely disambiguates the input. A single
+// keystroke (Enter) is then enough to fill the row and advance.
+let _pendingCommitIdx = null;
+
+function _renderWordResult(idx, isPartial) {
+  // Render the full result box for word index `idx`. If isPartial
+  // is true, the user has not typed the full word yet — just
+  // typed enough to disambiguate. We give the box a yellow border
+  // and hint "Press Enter to commit" so the user knows there is
+  // a single keystroke shortcut available.
+  const resultEl = document.getElementById('word-result');
+  if (!resultEl) return;
+  const bits = indexToBits(idx);
+  const bstr = bits.map(b => b ? '1' : '0').join('');
+  const bitValues = [];
+  for (let c = 0; c < COLS; c++) {
+    if (bits[c]) bitValues.push(BIT_VALUES[c]);
+  }
+  const breakdown = bitValues.length
+    ? ' <span class="result-breakdown">(' + bitValues.join('+') + ')</span>'
+    : '';
+  const dispRow = selRow + (gridPage === 1 ? 1 : 13);
+  const enterHint = isPartial
+    ? '<div class="result-meta" style="margin-top:6px;color:#fff600;font-weight:700;letter-spacing:0.5px;">↵ Press Enter to commit</div>'
+    : '';
+  resultEl.className = 'result-box' + (isPartial ? ' result-box-unique' : '');
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `
+    <div class="result-meta" style="margin-bottom:4px;">#${idx+1}${breakdown}</div>
+    <div class="result-word${isPartial ? ' result-word-unique' : ''}">${BIP39[idx]}</div>
+    <div class="result-bits">${bstr.slice(0,4)} ${bstr.slice(4,8)} ${bstr.slice(8,12)}</div>
+    ${enterHint}
+    <div class="result-meta" style="margin-top:4px;"><span class="assign-link" style="cursor:pointer;color:var(--accent);text-decoration:underline"
+            onclick="applyWordToRow(${idx})">→ Assign word to row ${dispRow}</span></div>
+  `;
+}
+
+function onWordInput(val) {
+  const input     = document.getElementById('word-input');
+  const suggestEl = document.getElementById('word-suggests');
+  const resultEl  = document.getElementById('word-result');
+  const v = val.toLowerCase().trim();
+
+  suggestEl.innerHTML = '';
+  resultEl.style.display = 'none';
+  resultEl.className = 'result-box';
+  input.className = 'lookup-input';
+  _pendingCommitIdx = null;
+
+  if (!v) return;
+
+  // Case 1: exact match — show the full result box, set pending
+  // commit so Enter applies the word.
+  const exactIdx = BIP39.indexOf(v);
+  if (exactIdx >= 0) {
+    input.className = 'lookup-input valid';
+    _pendingCommitIdx = exactIdx;
+    _renderWordResult(exactIdx, /*isPartial=*/false);
+    return;
+  }
+
+  // Case 2 & 3: prefix matches.
+  const suggestions = BIP39.filter(w => w.startsWith(v)).slice(0, 8);
+  if (suggestions.length === 1) {
+    // Case 2: unique prefix match (e.g. user typed "cinna" → only
+    // "cinnamon" matches). Show the full result box for that word,
+    // yellow-styled, and arm Enter to commit.
+    const idx = BIP39.indexOf(suggestions[0]);
+    _pendingCommitIdx = idx;
+    _renderWordResult(idx, /*isPartial=*/true);
+    // Also show the chip itself, yellow-styled, so the user can
+    // click it directly with the mouse if they prefer.
+    const chip = document.createElement('div');
+    chip.className = 'suggest-chip unique';
+    chip.textContent = suggestions[0];
+    chip.onclick = () => applyWordToRow(idx);
+    suggestEl.appendChild(chip);
+  } else if (suggestions.length > 1) {
+    // Case 3: multiple matches — show plain chips for each.
+    suggestions.forEach(w => {
+      const chip = document.createElement('div');
+      chip.className = 'suggest-chip';
+      chip.textContent = w;
+      chip.onclick = () => {
+        document.getElementById('word-input').value = w;
+        onWordInput(w);
+      };
+      suggestEl.appendChild(chip);
+    });
+  } else {
+    // Case 4: no matches.
+    input.className = 'lookup-input error';
+  }
+}
+
+// Enter-to-commit handler. Wired via onkeydown on the input below.
+function _onWordInputKey(e) {
+  if (e.key === 'Enter' && _pendingCommitIdx !== null) {
+    e.preventDefault();
+    applyWordToRow(_pendingCommitIdx);
+  }
+}
+
+function applyWordToRow(wordIdx) {
+  // Apply the word to the currently selected row.
+  activeGrid()[selRow] = indexToBits(wordIdx);
+
+  // Advance to the next row. If we're at the last row of page 1
+  // (row 11 = word #12), jump to row 0 of page 2 (word #13).
+  // If we're at the last row of page 2 (row 11 = word #24), wrap
+  // back to row 0 of page 1.
+  if (selRow < ROWS - 1) {
+    selRow += 1;
+  } else {
+    selRow = 0;
+    gridPage = (gridPage === 1) ? 2 : 1;
+  }
+  selCol = 0;
+
+  // Clear the lookup input and hide the result panel so the user
+  // can immediately type the next word without manually clearing.
+  const wi = document.getElementById('word-input');
+  const wr = document.getElementById('word-result');
+  const ws = document.getElementById('word-suggests');
+  if (wi) wi.value = '';
+  if (wr) wr.style.display = 'none';
+  if (ws) ws.innerHTML = '';
+  _pendingCommitIdx = null;
+
+  renderGrid();
+  syncWordInput();
+}
+
+// ── NUMBER INPUT LOOKUP ──────────────────────────────────────
+function onNumInput(val) {
+  const input    = document.getElementById('num-input');
+  const resultEl = document.getElementById('num-result');
+  const n = parseInt(val, 10);
+
+  resultEl.style.display = 'none';
+  input.className = 'lookup-input';
+
+  if (!val || isNaN(n)) return;
+
+  if (n < 1 || n > 2048) {
+    input.className = 'lookup-input error';
+    return;
+  }
+
+  input.className = 'lookup-input valid';
+  const idx  = n - 1;
+  const word = BIP39[idx];
+  const bits = indexToBits(idx);
+  const bstr = bits.map(b => b ? '1' : '0').join('');
+  const dispRow = selRow + (gridPage === 1 ? 1 : 13);
+
+  resultEl.style.display = 'block';
+  resultEl.innerHTML = `
+    <div class="result-meta" style="margin-bottom:4px;">#${n}</div>
+    <div class="result-word">${word}</div>
+    <div class="result-bits">${bstr.slice(0,4)} ${bstr.slice(4,8)} ${bstr.slice(8,12)}</div>
+    <div class="result-meta" style="margin-top:4px;"><span class="assign-link" style="cursor:pointer;color:var(--accent);text-decoration:underline"
+          onclick="applyWordToRow(${idx})">→ Assign word to row ${dispRow}</span></div>
+  `;
+}
+
+function syncWordInput() {
+  const g = activeGrid();
+  if (g[selRow].some(b => b)) {
+    const idx = bitsToIndex(g[selRow]);
+    if (idx >= 0 && idx < 2048) {
+      const input = document.getElementById('word-input');
+      input.value = BIP39[idx];
+      onWordInput(BIP39[idx]);
+    }
+  } else {
+    refreshLookupResults();
+  }
+}
+
+function refreshLookupResults() {
+  const dispRow = selRow + (gridPage === 1 ? 1 : 13);
+  [document.getElementById('word-result'), document.getElementById('num-result')].forEach(el => {
+    if (!el || el.style.display === 'none') return;
+    el.querySelectorAll('.assign-link').forEach(span => {
+      span.textContent = '\u2192 Assign word to row ' + dispRow;
+    });
+  });
+}
+
+function secureWipe() {
+  if (!confirm('Wipe all grid data? This cannot be undone.')) return;
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++)
+      grid[r][c] = false;
+  selRow = 0; selCol = 0;
+  location.reload();
+}
+
+const tip = document.getElementById('tooltip');
+function showTooltip(x, y, text) {
+  tip.textContent = text;
+  tip.style.left = (x + 14) + 'px';
+  tip.style.top  = (y - 28) + 'px';
+  tip.classList.add('show');
+}
+function hideTooltip() { tip.classList.remove('show'); }
+
+let resizeTimer;
+window.addEventListener('resize', () => {
+  clearTimeout(resizeTimer);
+  resizeTimer = setTimeout(renderGrid, 60);
+});
+
+function getCSS(varName) {
+  return getComputedStyle(document.body).getPropertyValue(varName).trim();
+}
+
+// ── THEME TOGGLE ─────────────────────────────────────────────
+const THEME_LABELS = [
+  { label: '🌙', cls: 'theme-gray'  },
+  { label: '☀️', cls: 'theme-light' }
+];
+let themeIdx = 0;
+
+function cycleTheme() {
+  themeIdx = (themeIdx + 1) % 2;
+  applyTheme();
+}
+
+function applyTheme() {
+  document.body.className = THEME_LABELS[themeIdx].cls;
+  const themeIcon = document.getElementById('theme-icon');
+  if (themeIcon) {
+    const isLightMode = THEME_LABELS[themeIdx].cls === 'theme-light';
+    themeIcon.innerHTML = isLightMode
+      ? '<path d=\"M14 5.5C9.3 5.5 5.5 9.3 5.5 14C5.5 18.7 9.3 22.5 14 22.5C16.2 22.5 18.2 21.6 19.7 20.2C17.9 19.7 16.5 18 16.5 15.9C16.5 13.3 18.6 11.2 21.2 11.2C21.6 11.2 21.9 11.3 22.3 11.4C21 8 17.8 5.5 14 5.5Z\" stroke=\"currentColor\" stroke-width=\"1.8\" stroke-linejoin=\"round\" fill=\"none\"/>'
+      : '<circle cx=\"14\" cy=\"14\" r=\"5.5\" stroke=\"currentColor\" stroke-width=\"2\" fill=\"none\"/><line x1=\"22.3\" y1=\"14.0\" x2=\"25.2\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"19.87\" y1=\"19.87\" x2=\"21.92\" y2=\"21.92\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"14.0\" y1=\"22.3\" x2=\"14.0\" y2=\"25.2\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"8.13\" y1=\"19.87\" x2=\"6.08\" y2=\"21.92\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"5.7\" y1=\"14.0\" x2=\"2.8\" y2=\"14.0\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"8.13\" y1=\"8.13\" x2=\"6.08\" y2=\"6.08\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"14.0\" y1=\"5.7\" x2=\"14.0\" y2=\"2.8\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/><line x1=\"19.87\" y1=\"8.13\" x2=\"21.92\" y2=\"6.08\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\"/>';
+  }
+  const isLight = THEME_LABELS[themeIdx].cls === 'theme-light';
+  document.body.style.removeProperty('--accent');
+  document.body.style.removeProperty('--accent2');
+  document.body.style.removeProperty('--dot-on');
+  document.body.style.removeProperty('--dot-filled');
+  _hoverFill = 'var(--accent)';
+  const logo = document.getElementById('dotbip-logo');
+  if (logo) logo.style.fill = '';
+  requestAnimationFrame(() => requestAnimationFrame(() => renderGrid()));
+}
+
+function switchGridPage(page) {
+  gridPage = page;
+  selRow = 0; selCol = 0;
+  const wi = document.getElementById('word-input');
+  const wr = document.getElementById('word-result');
+  if (wi) wi.value = '';
+  if (wr) { wr.style.display = 'none'; }
+  renderGrid();
+}
+
+function updatePageIndicator() {
+  const p1HasData = grid.some(r  => r.some(b => b));
+  const p2HasData = grid2.some(r => r.some(b => b));
+  const sq1 = document.getElementById('sq-p1');
+  const sq2 = document.getElementById('sq-p2');
+  const lbl = document.getElementById('page-label');
+  if (!sq1) return;
+  sq1.className = 'page-sq' + (gridPage === 1 ? ' active' : '') + (p1HasData ? ' has-data' : '');
+  sq2.className = 'page-sq' + (gridPage === 2 ? ' active' : '') + (p2HasData ? ' has-data' : '');
+}
+
+function toggleInfoPanel() {
+  const p = document.getElementById('info-panel');
+  if (!p) return;
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  p.style.flexDirection  = 'column';
+  p.style.alignItems     = 'center';
+  p.style.justifyContent = 'center';
+  const btn = document.getElementById('info-btn');
+  if (btn) btn.style.opacity = open ? '1' : '0.5';
+}
+
+function togglePadlockPanel() {
+  const p = document.getElementById('padlock-panel');
+  if (!p) return;
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  p.style.flexDirection  = 'column';
+  p.style.alignItems     = 'center';
+  p.style.justifyContent = 'flex-start';
+  const btn = document.getElementById('padlock-btn');
+  if (btn) btn.style.opacity = open ? '1' : '0.5';
+}
+
+function toggleIntegrityPanel() {
+  const p = document.getElementById('integrity-panel');
+  if (!p) return;
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  p.style.flexDirection  = 'column';
+  p.style.alignItems     = 'center';
+  p.style.justifyContent = 'flex-start';
+  const btn = document.getElementById('integrity-btn');
+  if (btn) btn.style.opacity = open ? '1' : '0.5';
+}
+
+function toggleIndexingPanel() {
+  const p = document.getElementById('indexing-panel');
+  if (!p) return;
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  p.style.flexDirection  = 'column';
+  p.style.alignItems     = 'center';
+  p.style.justifyContent = 'flex-start';
+  const btn = document.getElementById('indexing-btn');
+  if (btn) btn.style.opacity = open ? '1' : '0.5';
+}
+
+function toggleFlamePanel() {
+  const p = document.getElementById('flame-panel');
+  if (!p) return;
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  p.style.flexDirection  = 'column';
+  p.style.alignItems     = 'center';
+  p.style.justifyContent = 'flex-start';
+  const btn = document.getElementById('flame-btn');
+  if (btn) btn.style.opacity = open ? '1' : '0.5';
+}
+
+function toggleDevicePanel() {
+  const p = document.getElementById('device-panel');
+  if (!p) return;
+  const open = p.style.display === 'flex';
+  p.style.display = open ? 'none' : 'flex';
+  p.style.flexDirection  = 'column';
+  p.style.alignItems     = 'center';
+  p.style.justifyContent = 'flex-start';
+  const btn = document.getElementById('device-btn');
+  if (btn) btn.style.opacity = open ? '1' : '0.5';
+}
+
+(function init() {
+  console.assert(BIP39.length === 2048, 'BIP39 wordlist must have 2048 words');
+  console.assert(BIP39[0] === 'abandon', 'First word must be abandon');
+  console.assert(BIP39[2047] === 'zoo', 'Last word must be zoo');
+  updateZoomBtns();
+  document.body.className = THEME_LABELS[themeIdx].cls;
+  // First render is deferred and gated on the online-detection block
+  // (which runs synchronously after this IIFE). See _tryInitialRender()
+  // in the online-detection section — it fires renderGrid() exactly
+  // once, either after _setOfflineUI() confirms we're safe, or after
+  // the user clicks "I AM AIR-GAPPED" on Tor Browser.
+})();
+
+// ── SIDEBAR RESIZE ───────────────────────────────────────────
+(function initResize() {
+  const handle  = document.getElementById('resize-handle');
+  const sidebar = document.getElementById('sidebar');
+  let dragging = false;
+  let startX, startW;
+
+  handle.addEventListener('mousedown', function(e) {
+    dragging = true;
+    startX = e.clientX;
+    startW = sidebar.getBoundingClientRect().width;
+    handle.classList.add('dragging');
+    document.body.style.cursor    = 'col-resize';
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+  document.addEventListener('mousemove', function(e) {
+    if (!dragging) return;
+    const delta = startX - e.clientX;
+    const newW  = Math.max(160, Math.min(520, startW + delta));
+    sidebar.style.flex = `0 0 ${newW}px`;
+    clearTimeout(handle._rt);
+    handle._rt = setTimeout(renderGrid, 30);
+  });
+  document.addEventListener('mouseup', function() {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    document.body.style.cursor    = '';
+    document.body.style.userSelect = '';
+    renderGrid();
+  });
+
+  handle.addEventListener('touchstart', function(e) {
+    dragging = true;
+    startX = e.touches[0].clientX;
+    startW = sidebar.getBoundingClientRect().width;
+    handle.classList.add('dragging');
+    e.preventDefault();
+  }, { passive: false });
+  document.addEventListener('touchmove', function(e) {
+    if (!dragging) return;
+    const delta = startX - e.touches[0].clientX;
+    const newW  = Math.max(160, Math.min(520, startW + delta));
+    sidebar.style.flex = `0 0 ${newW}px`;
+  }, { passive: false });
+  document.addEventListener('touchend', function() {
+    if (!dragging) return;
+    dragging = false;
+    handle.classList.remove('dragging');
+    renderGrid();
+  });
+})();
+
+
+// ── COLOR PICKER ─────────────────────────────────────────────
+let _accentColor  = '#fff600';
+let _accent2Color = '#ffe000';
+
+function _lightenAccent(hex) {
+  const r = parseInt(hex.slice(1,3),16);
+  const g = parseInt(hex.slice(3,5),16);
+  const b = parseInt(hex.slice(5,7),16);
+  const mix = (c) => Math.round(c * 0.75 + 255 * 0.1);
+  return '#' + [mix(r),mix(g),mix(b)].map(v=>v.toString(16).padStart(2,'0')).join('');
+}
+
+function setAccentColor(hex) {
+  _accentColor  = hex;
+  _accent2Color = _lightenAccent(hex);
+  document.body.style.setProperty('--accent',  _accentColor);
+  document.body.style.setProperty('--accent2', _accent2Color);
+  document.body.style.setProperty('--dot-on',  _accentColor);
+  document.body.style.setProperty('--dot-filled', _accentColor);
+  const logo = document.getElementById('dotbip-logo');
+  if (logo) logo.style.fill = _accentColor;
+  _hoverFill = 'var(--accent)';
+  document.querySelectorAll('.swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.color === hex);
+  });
+  document.getElementById('color-palette').classList.remove('open');
+  renderGrid();
+}
+
+function toggleColorPalette() {
+  const p = document.getElementById('color-palette');
+  p.classList.toggle('open');
+  document.querySelectorAll('.swatch').forEach(s => {
+    s.classList.toggle('active', s.dataset.color === _accentColor);
+  });
+}
+
+// Close palette when clicking outside
+document.addEventListener('click', function(e) {
+  const wrap = document.getElementById('color-picker-wrap');
+  if (wrap && !wrap.contains(e.target)) {
+    document.getElementById('color-palette').classList.remove('open');
+  }
+});
+
+</script>
+
+<!-- ONLINE WARNING OVERLAY -->
+<div id="online-overlay" style="display:flex;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,0.96);overflow-y:auto;">
+  <div class="overlay-inner"><div style="max-width:760px;border:2px solid #cc2222;border-radius:16px;padding:32px 20px;background:#0f0505;font-family:system-ui,-apple-system,sans-serif;text-align:center;box-sizing:border-box;">
+    <div style="font-size:64px;margin-bottom:12px;">&#128128;</div>
+    <div style="font-size:26px;font-weight:800;color:#ff4444;letter-spacing:-0.5px;margin-bottom:6px;">SAFETY CHECK</div>
+    <div style="font-size:11px;font-weight:700;color:#ff4444;letter-spacing:1.2px;text-transform:uppercase;margin-bottom:20px;">Confirm you are offline before continuing</div>
+    <p style="font-size:14px;color:#cccccc;line-height:1.8;margin:0 0 16px;">For your safety, this warning is shown every time the page loads. If you are connected to the internet, disconnect now (turn off Wi-Fi, unplug Ethernet) and click RETRY.</p>
+    <div style="display:inline-block;background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.4px;padding:5px 12px;margin:4px 0 20px;border-radius:3px;">NEVER ENTER SEED WORDS ON A CONNECTED DEVICE!</div>
+    <p style="font-size:12px;color:#888888;line-height:1.7;margin:0 0 24px;">
+      <strong style="color:#aaaaaa;">Using Tor Browser or Tails?</strong> Browsers cannot reliably detect when you are truly offline — they assume online by default. On the very first launch on a freshly-booted Tails system, you also need to refresh the page once for the grid to load. Use the buttons below.
+    </p>
+    <div style="display:flex;justify-content:center;gap:14px;margin-bottom:16px;flex-wrap:wrap;">
+      <label for="overlay-dismissed" id="btn-overlay-retry" class="retry-label">
+        <div style="font-size:11px;font-weight:700;color:#44dd66;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">&#10003; I am offline now</div>
+        <div style="font-size:24px;font-weight:800;color:#44ff88;letter-spacing:1px;">RETRY</div>
+      </label>
+      <!--
+        REFRESH TO LOAD button (Tor / Tails first-launch workaround).
+        Pure HTML <a href="?r"> link — adds ?r to the URL and forces
+        a full page reload. After reload, JavaScript detects ?r in
+        location.search and swaps this button for the I AM OFFLINE
+        button below. If JavaScript never runs at all (the case
+        we're working around), the user simply sees REFRESH TO LOAD
+        on every load, which is harmless — they just keep clicking
+        until the page works.
+      -->
+      <a href="?r" id="btn-overlay-refresh" class="refresh-load-label">
+        <div style="font-size:11px;font-weight:700;color:#ffffff;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Tor Browser / Tails only</div>
+        <div style="font-size:18px;font-weight:800;color:#fff600;letter-spacing:0.5px;">REFRESH TO LOAD</div>
+      </a>
+      <!--
+        I AM OFFLINE button — hidden by default. Revealed by JS on
+        the post-refresh load (when location.search === '?r'),
+        AND simultaneously the REFRESH TO LOAD button is hidden.
+      -->
+      <label for="overlay-dismissed" id="btn-overlay-airgapped" class="airgap-label" style="display:none;">
+        <div style="font-size:11px;font-weight:700;color:#8899cc;letter-spacing:1px;text-transform:uppercase;margin-bottom:4px;">Tor Browser / Tails only</div>
+        <div style="font-size:18px;font-weight:800;color:#aabbee;letter-spacing:0.5px;">I AM OFFLINE</div>
+      </label>
+    </div>
+    <div id="overlay-loading-msg" style="font-size:11px;color:#666666;letter-spacing:0.4px;margin-top:4px;font-family:monospace;">[0]</div>
+  </div></div>
+</div>
+
+<script>
+// ════════════════════════════════════════════════════════════════
+// EARLIEST BOOTSTRAP — runs before EVERYTHING else in script #2
+// ════════════════════════════════════════════════════════════════
+//
+// The overlay is shown by HTML alone (display:flex baked into the
+// HTML on line 2362). The user sees it within milliseconds. We
+// MUST get the dismissal buttons working before any other code
+// can fail or hang. So this block runs first, before GF tables,
+// before Reed-Solomon, before anything.
+//
+// The buttons are wired with two-stage handlers:
+//   • Stage 1 (THIS BLOCK): minimal handler that hides the overlay
+//     and sets a flag. This is enough to unblock the user even if
+//     everything else in the script subsequently fails.
+//   • Stage 2 (later in script): the full implementation overrides
+//     the handler with the proper cleanup + grid render. If we
+//     never reach Stage 2, the user can still use the page — they
+//     just won't have the optional polish.
+//
+// We also expose a diagnostic counter via #overlay-loading-msg so
+// the user can see exactly how far the script got if anything does
+// hang. This makes future debugging on Tails / Tor far easier.
+// ────────────────────────────────────────────────────────────────
+
+let __bootstrapStep = 0;
+function __setBootStep(s, label) {
+  __bootstrapStep = s;
+  try {
+    const el = document.getElementById('overlay-loading-msg');
+    if (el) el.textContent = '[' + s + '] ' + label;
+  } catch (e) { /* DOM not ready — ignore */ }
+}
+
+// These two flags are read by the rest of the online-detection
+// code further down. Declaring them here ensures they exist even
+// if later parts of the script fail to load.
+let onlineWarningDismissed = false;
+let _airGappedOverride = false;
+
+// ── POST-REFRESH BUTTON SWAP ─────────────────────────────────
+// On the very first launch on a freshly-booted Tails system, Tor
+// Browser sometimes does not execute inline scripts at all, which
+// prevents the grid from rendering. The fix is for the user to
+// click REFRESH TO LOAD on the warning page, which navigates to
+// the same URL with "?r" appended — forcing a real reload after
+// which scripts execute normally. On the post-refresh load this
+// block runs (because JS works now) and swaps the visible button:
+//   • Hides REFRESH TO LOAD (no longer needed).
+//   • Shows I AM OFFLINE (the proper Tor/Tails confirmation).
+// On every other system (normal browser or post-refresh Tor) JS
+// also runs on first load — but location.search has no "?r", so
+// REFRESH TO LOAD stays visible. The user just clicks it once and
+// gets the second-load behaviour, which is consistent across all
+// platforms and avoids surprising the Tails user with a different
+// flow than everyone else.
+(function _postRefreshSwap() {
+  if (location.search === '?r') {
+    const refreshBtn = document.getElementById('btn-overlay-refresh');
+    const offlineBtn = document.getElementById('btn-overlay-airgapped');
+    if (refreshBtn) refreshBtn.style.display = 'none';
+    if (offlineBtn) offlineBtn.style.display = 'inline-block';
+  }
+})();
+
+// Stage-1 minimal button wiring. The overlay is now dismissed by
+// pure CSS via a hidden checkbox + label mechanism, so even if
+// THIS SCRIPT NEVER RUNS the user can still click the buttons
+// to get past the warning. This block only adds JS-level state
+// updates on top of the CSS-driven dismissal — for the case when
+// scripts DO run.
+(function _bootstrapOverlayButtons() {
+  __setBootStep(1, 'wiring buttons…');
+  const checkbox  = document.getElementById('overlay-dismissed');
+  const airgapBtn = document.getElementById('btn-overlay-airgapped');
+  const retryBtn  = document.getElementById('btn-overlay-retry');
+
+  // The checkbox 'change' event fires whenever the user clicks
+  // either label. This is the canonical hook to sync JS state
+  // with the CSS-driven UI.
+  if (checkbox) {
+    checkbox.addEventListener('change', function() {
+      if (!checkbox.checked) return;
+      // User dismissed the overlay. Sync JS state.
+      onlineWarningDismissed = true;
+      _airGappedOverride     = true;
+      if (typeof _forceAirGapped === 'function') {
+        // Full Stage-2 implementation: triggers grid render etc.
+        _forceAirGapped();
+      }
+    });
+  }
+
+  // Distinguish RETRY clicks from AIRGAP clicks for the JS path
+  // only. The CSS hides the overlay either way; this just lets
+  // the JS code know which button was used so it can call
+  // checkOnlineStatus instead of going straight to air-gapped.
+  if (retryBtn) {
+    retryBtn.addEventListener('click', function(e) {
+      // If JS is fully online, call the proper status check first.
+      // The CSS will already have dismissed the overlay — but if
+      // we're actually online, we need to re-show it.
+      if (typeof checkOnlineStatus === 'function') {
+        // Defer so the checkbox state has time to flip first,
+        // then if we're online we re-show via _setOnlineUI which
+        // sets display:flex (overrides CSS :checked rule? — see
+        // below note).
+        setTimeout(checkOnlineStatus, 0);
+      }
+    });
+  }
+  __setBootStep(2, 'buttons ready, loading rest of file…');
+})();
+
+// EMERGENCY FAILSAFE: if the rest of script #2 somehow fails to
+// load (CSP issue, browser crash, AppArmor block, anything), this
+// timer guarantees the user is told what's going on. The bootstrap
+// handlers above will still work — they fall back to just hiding
+// the overlay — so the user can always proceed to use the page.
+setTimeout(function() {
+  if (__bootstrapStep < 8) {
+    const el = document.getElementById('overlay-loading-msg');
+    if (el) {
+      el.innerHTML = '[' + __bootstrapStep + '] script load incomplete — ' +
+                     'buttons still work in fallback mode';
+      el.style.color = '#ff8844';
+    }
+  }
+}, 5000);
+
+// ════════════════════════════════════════════════════════════════
+// Now continue with the rest of script #2.
+// ════════════════════════════════════════════════════════════════
+
+// ── GF(256) ARITHMETIC FOR REED-SOLOMON ──────────────────────
+const _EXP = new Uint8Array(512);
+const _LOG  = new Uint8Array(256);
+(function() {
+  let x = 1;
+  for (let i = 0; i < 255; i++) {
+    _EXP[i] = x; _LOG[x] = i;
+    x <<= 1; if (x & 256) x ^= 0x11D;
+  }
+  for (let i = 255; i < 512; i++) _EXP[i] = _EXP[i - 255];
+})();
+__setBootStep(3, 'GF(256) tables ready…');
+
+function _gfMul(a, b) { return (a && b) ? _EXP[_LOG[a] + _LOG[b]] : 0; }
+
+function _rsEncode(data, nEC) {
+  let g = [1];
+  for (let i = 0; i < nEC; i++) {
+    const n = new Array(g.length + 1).fill(0);
+    for (let j = 0; j < g.length; j++) {
+      n[j]     ^= g[j];
+      n[j + 1] ^= _gfMul(g[j], _EXP[i]);
+    }
+    g = n;
+  }
+  const m = [...data, ...new Array(nEC).fill(0)];
+  for (let i = 0; i < data.length; i++) {
+    const c = m[i];
+    if (c) for (let j = 0; j < g.length; j++) m[i + j] ^= _gfMul(c, g[j]);
+  }
+  return m.slice(data.length);
+}
+
+function _seedToBytes(wordIndices) {
+  const nWords = wordIndices.length;
+  const nBits  = nWords === 12 ? 128 : 256;
+  const bits   = [];
+  for (const idx of wordIndices)
+    for (let b = 10; b >= 0; b--) bits.push((idx >> b) & 1);
+  const bytes = [];
+  for (let i = 0; i < nBits; i += 8) {
+    let v = 0;
+    for (let j = 0; j < 8; j++) v = (v << 1) | bits[i + j];
+    bytes.push(v);
+  }
+  return bytes;
+}
+
+function _dataCW(bytes, version) {
+  const cap  = version === 1 ? 19 : 34;
+  const bits = [0, 1, 0, 0];
+  const n    = bytes.length;
+  for (let i = 7; i >= 0; i--) bits.push((n >> i) & 1);
+  for (const b of bytes)
+    for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1);
+  bits.push(0, 0, 0, 0);
+  const pad = [0xEC, 0x11]; let pi = 0;
+  while (bits.length < cap * 8) {
+    if (bits.length % 8 === 0) {
+      const pb = pad[pi++ % 2];
+      for (let i = 7; i >= 0; i--) bits.push((pb >> i) & 1);
+    } else { bits.push(0); }
+  }
+  const cw = [];
+  for (let i = 0; i < cap * 8; i += 8) {
+    let v = 0;
+    for (let j = 0; j < 8; j++) v = (v << 1) | bits[i + j];
+    cw.push(v);
+  }
+  return cw;
+}
+
+function _buildMatrix(version, allBits) {
+  const S = 17 + 4 * version;
+  const m = Array.from({length: S}, () => new Array(S).fill(0));
+  const f = Array.from({length: S}, () => new Array(S).fill(false));
+
+  function setF(r, c, v) {
+    if (r >= 0 && r < S && c >= 0 && c < S) { m[r][c] = v; f[r][c] = true; }
+  }
+
+  const fp = [
+    [1,1,1,1,1,1,1],[1,0,0,0,0,0,1],[1,0,1,1,1,0,1],
+    [1,0,1,1,1,0,1],[1,0,1,1,1,0,1],[1,0,0,0,0,0,1],[1,1,1,1,1,1,1]
+  ];
+  for (const [r0, c0] of [[0,0],[0,S-7],[S-7,0]])
+    for (let i = 0; i < 7; i++)
+      for (let j = 0; j < 7; j++) setF(r0 + i, c0 + j, fp[i][j]);
+
+  for (let i = 0; i < 8; i++) {
+    setF(7, i, 0); setF(i, 7, 0);
+    setF(7, S-1-i, 0); setF(i, S-8, 0);
+    setF(S-8, i, 0); setF(S-1-i, 7, 0);
+  }
+
+  for (let i = 8; i < S - 8; i++) {
+    setF(6, i, i % 2 === 0 ? 1 : 0);
+    setF(i, 6, i % 2 === 0 ? 1 : 0);
+  }
+
+  setF(4 * version + 9, 8, 1);
+
+  if (version === 2) {
+    for (let i = -2; i <= 2; i++)
+      for (let j = -2; j <= 2; j++) {
+        const v = (Math.abs(i) === 2 || Math.abs(j) === 2) ? 1
+                : (i === 0 && j === 0 ? 1 : 0);
+        if (!f[18+i][18+j]) setF(18+i, 18+j, v);
+      }
+  }
+
+  for (let i = 0; i < 9; i++) { setF(8, i, 0); setF(i, 8, 0); }
+  for (let i = 0; i < 8; i++) { setF(8, S-1-i, 0); setF(S-1-i, 8, 0); }
+
+  let bi = 0, col = S - 1, up = true;
+  while (col > 0) {
+    if (col === 6) col--;
+    const rows = up
+      ? Array.from({length: S}, (_, i) => S - 1 - i)
+      : Array.from({length: S}, (_, i) => i);
+    for (const row of rows)
+      for (const dc of [0, 1]) {
+        const c = col - dc;
+        if (!f[row][c]) { m[row][c] = bi < allBits.length ? allBits[bi++] : 0; }
+      }
+    col -= 2; up = !up;
+  }
+  return {m, f, S};
+}
+
+function _maskCond(id, r, c) {
+  switch (id) {
+    case 0: return (r + c) % 2 === 0;
+    case 1: return r % 2 === 0;
+    case 2: return c % 3 === 0;
+    case 3: return (r + c) % 3 === 0;
+    case 4: return (Math.floor(r / 2) + Math.floor(c / 3)) % 2 === 0;
+    case 5: return (r * c) % 2 + (r * c) % 3 === 0;
+    case 6: return ((r * c) % 2 + (r * c) % 3) % 2 === 0;
+    case 7: return ((r + c) % 2 + (r * c) % 3) % 2 === 0;
+  }
+}
+
+function _penalty(mat, S) {
+  let p = 0;
+  for (let r = 0; r < S; r++) {
+    for (const line of [mat[r], Array.from({length: S}, (_, i) => mat[i][r])]) {
+      let run = 1;
+      for (let i = 1; i < S; i++) {
+        if (line[i] === line[i - 1]) { run++; if (run === 5) p += 3; else if (run > 5) p++; }
+        else run = 1;
+      }
+    }
+  }
+  for (let r = 0; r < S - 1; r++)
+    for (let c = 0; c < S - 1; c++) {
+      const v = mat[r][c];
+      if (mat[r][c+1] === v && mat[r+1][c] === v && mat[r+1][c+1] === v) p += 3;
+    }
+  const pa = [1,0,1,1,1,0,1,0,0,0,0], pb = [0,0,0,0,1,0,1,1,1,0,1];
+  for (let r = 0; r < S; r++)
+    for (let c = 0; c < S; c++) {
+      if (c + 11 <= S) {
+        const s = Array.from({length: 11}, (_, i) => mat[r][c + i]);
+        if (s.join('') === pa.join('') || s.join('') === pb.join('')) p += 40;
+      }
+      if (r + 11 <= S) {
+        const s = Array.from({length: 11}, (_, i) => mat[r + i][c]);
+        if (s.join('') === pa.join('') || s.join('') === pb.join('')) p += 40;
+      }
+    }
+  const dark = mat.reduce((a, row) => a + row.reduce((b, c) => b + c, 0), 0);
+  const pct  = Math.floor(dark * 100 / (S * S));
+  const d    = Math.floor(Math.abs(pct - 50) / 5);
+  p += d * 10;
+  return p;
+}
+
+const _FMT_L = [0x77C4,0x72F3,0x7DAA,0x789D,0x662F,0x6318,0x6C41,0x6976];
+const _FMT_M = [0x5412,0x5125,0x5E7C,0x5B4B,0x45F9,0x40CE,0x4F97,0x4AA0];
+
+function _writeFormat(mat, S, maskId, fmtTable) {
+  const fmt = (fmtTable || _FMT_L)[maskId];
+  const fb  = Array.from({length: 15}, (_, i) => (fmt >> (14 - i)) & 1);
+  const hp  = [
+    [8,0],[8,1],[8,2],[8,3],[8,4],[8,5],[8,7],[8,8],
+    [7,8],[5,8],[4,8],[3,8],[2,8],[1,8],[0,8]
+  ];
+  hp.forEach(([r, c], i) => mat[r][c] = fb[i]);
+  for (let i = 0; i < 7; i++) mat[S-1-i][8] = fb[i];
+  for (let i = 0; i < 8; i++) mat[8][S-8+i] = fb[7+i];
+}
+
+function buildCompactSeedQR(wordIndices) {
+  const nWords    = wordIndices.length;
+  const version   = nWords === 12 ? 1 : 2;
+  const nEC       = nWords === 12 ? 7 : 10;
+  const seedBytes = _seedToBytes(wordIndices);
+  const dataCW    = _dataCW(seedBytes, version);
+  const ecCW      = _rsEncode(dataCW, nEC);
+
+  const allBits = [];
+  for (const cw of [...dataCW, ...ecCW])
+    for (let i = 7; i >= 0; i--) allBits.push((cw >> i) & 1);
+
+  const {m: base, f: fixed, S} = _buildMatrix(version, allBits);
+
+  let bestMask = 0, bestPenalty = Infinity;
+  for (let mid = 0; mid < 8; mid++) {
+    const mat = base.map(r => r.slice());
+    for (let r = 0; r < S; r++)
+      for (let c = 0; c < S; c++)
+        if (!fixed[r][c] && _maskCond(mid, r, c)) mat[r][c] ^= 1;
+    _writeFormat(mat, S, mid);
+    const p = _penalty(mat, S);
+    if (p < bestPenalty) { bestPenalty = p; bestMask = mid; }
+  }
+
+  const final = base.map(r => r.slice());
+  for (let r = 0; r < S; r++)
+    for (let c = 0; c < S; c++)
+      if (!fixed[r][c] && _maskCond(bestMask, r, c)) final[r][c] ^= 1;
+  _writeFormat(final, S, bestMask);
+
+  return {matrix: final, size: S};
+}
+
+function renderSeedQR(matrix, size, svgEl, px) {
+  const qz    = px * 4;
+  const total = size * px + 2 * qz;
+  svgEl.setAttribute('width',  total);
+  svgEl.setAttribute('height', total);
+  let out = '<rect width="' + total + '" height="' + total + '" fill="white"/>';
+  for (let r = 0; r < size; r++)
+    for (let c = 0; c < size; c++)
+      if (matrix[r][c] === 1)
+        out += '<rect x="' + (qz + c*px) + '" y="' + (qz + r*px) +
+               '" width="' + px + '" height="' + px + '" fill="black"/>';
+  svgEl.innerHTML = out;
+}
+
+// ── QR PANEL ─────────────────────────────────────────────────
+let qrOpen = false;
+let qrMode = 12;
+
+const _QR_ICON_SVG = '<svg width="12" height="12" viewBox="0 0 12 12" fill="currentColor" xmlns="http://www.w3.org/2000/svg" style="display:inline-block;vertical-align:middle;margin-right:4px;"><rect x="0" y="0" width="4" height="4"/><rect x="1" y="1" width="2" height="2" fill="var(--panel)"/><rect x="8" y="0" width="4" height="4"/><rect x="9" y="1" width="2" height="2" fill="var(--panel)"/><rect x="0" y="8" width="4" height="4"/><rect x="1" y="9" width="2" height="2" fill="var(--panel)"/><rect x="5" y="0" width="1" height="1"/><rect x="6" y="1" width="1" height="1"/><rect x="5" y="2" width="1" height="1"/><rect x="6" y="3" width="1" height="1"/><rect x="0" y="5" width="1" height="1"/><rect x="2" y="5" width="1" height="1"/><rect x="4" y="5" width="1" height="1"/><rect x="6" y="5" width="1" height="1"/><rect x="8" y="5" width="1" height="1"/><rect x="10" y="5" width="1" height="1"/><rect x="5" y="6" width="1" height="1"/><rect x="7" y="6" width="1" height="1"/><rect x="9" y="6" width="1" height="1"/><rect x="6" y="8" width="1" height="1"/><rect x="8" y="8" width="1" height="1"/><rect x="10" y="8" width="1" height="1"/><rect x="5" y="9" width="1" height="1"/><rect x="7" y="9" width="1" height="1"/><rect x="11" y="9" width="1" height="1"/><rect x="6" y="10" width="1" height="1"/><rect x="9" y="10" width="1" height="1"/><rect x="5" y="11" width="1" height="1"/><rect x="8" y="11" width="1" height="1"/><rect x="10" y="11" width="1" height="1"/></svg>';
+
+function toggleQR() {
+  qrOpen = !qrOpen;
+  const box = document.getElementById('qr-box');
+  const btn = document.getElementById('qr-toggle');
+  box.classList.toggle('open', qrOpen);
+  btn.classList.toggle('open', qrOpen);
+  btn.innerHTML = _QR_ICON_SVG + 'Seed QR';
+  if (qrOpen) updateQR();
+}
+
+function setQRMode(mode) {
+  qrMode = mode;
+  document.getElementById('qrm-12').classList.toggle('active', mode === 12);
+  document.getElementById('qrm-24').classList.toggle('active', mode === 24);
+  if (qrOpen) updateQR();
+}
+
+function updateQR() {
+  if (!qrOpen) return;
+  const svgEl     = document.getElementById('qr-svg');
+  const label     = document.getElementById('qr-label');
+  const toggleBtn = document.getElementById('qr-toggle');
+  const box       = document.getElementById('qr-box');
+  if (!svgEl) return;
+
+  const indices  = [];
+  let complete   = 0;
+  const nWords   = qrMode;
+
+  for (let row = 0; row < 12; row++) {
+    const idx = bitsToIndex(grid[row]);
+    indices.push(idx >= 0 ? idx : null);
+    if (idx >= 0) complete++;
+  }
+  if (nWords === 24) {
+    for (let row = 0; row < 12; row++) {
+      const idx = bitsToIndex(grid2[row]);
+      indices.push(idx >= 0 ? idx : null);
+      if (idx >= 0) complete++;
+    }
+  }
+
+  const hasAll = complete === nWords && !indices.slice(0, nWords).includes(null);
+  toggleBtn.classList.toggle('has-qr', hasAll);
+  box.classList.toggle('has-qr', hasAll);
+
+  if (!hasAll) {
+    svgEl.setAttribute('width',  '168');
+    svgEl.setAttribute('height', '168');
+    svgEl.innerHTML =
+      '<rect width="168" height="168" fill="white"/>' +
+      '<rect x="10" y="10" width="148" height="148" fill="none" ' +
+        'stroke="#ddd" stroke-width="2" stroke-dasharray="6,4"/>' +
+      '<text x="84" y="78" text-anchor="middle" font-family="monospace" ' +
+        'font-size="12" fill="#aaa">' + complete + '/' + nWords + ' words</text>' +
+      '<text x="84" y="98" text-anchor="middle" font-family="monospace" ' +
+        'font-size="9" fill="#ccc">fill all rows to generate</text>';
+    label.textContent = complete + '/' + nWords + ' words — incomplete';
+    const warn = document.getElementById('qr-warning');
+    if (warn) warn.style.display = 'none';
+    return;
+  }
+
+  const {matrix, size} = buildCompactSeedQR(indices.slice(0, nWords));
+  const px = nWords === 12 ? 7 : 6;
+  renderSeedQR(matrix, size, svgEl, px);
+  label.textContent = 'Compact SeedQR — ' + nWords + '-word (v' + (nWords === 12 ? 1 : 2) + ')';
+  const _warn = document.getElementById('qr-warning');
+  if (_warn) _warn.style.display = 'block';
+}
+__setBootStep(4, 'QR functions ready…');
+
+// ── ONLINE DETECTION ─────────────────────────────────────────
+//
+// PROBLEM: Tor Browser always spoofs navigator.onLine === true to
+// prevent network-state fingerprinting. Polling that property on
+// Tails/Tor therefore fires a false "you are online" warning the
+// moment the page loads, wipes all data, and blocks the UI under
+// the overlay — even when the machine is completely air-gapped.
+//
+// SOLUTION: Two-tier detection strategy.
+//
+//  Tier 1 — startup check (runs once on load):
+//    • file:// protocol: use navigator.onLine but ONLY if it
+//      reports false (safe). If it reports true we cannot trust
+//      it (Tor Browser spoofs it). Instead we attempt a tiny
+//      XMLHttpRequest to a guaranteed-nonexistent local address
+//      (0.0.0.0). On a truly offline machine this fails
+//      immediately with a network error. On a connected machine
+//      it also fails, but the CSP blocks it before it leaves the
+//      process — so this gives us no useful signal either.
+//      Conclusion: for file:// we trust offline and rely on
+//      Tier 2 for live detection. This is safe: the whole
+//      security model is "disconnect before opening".
+//    • http(s)://: navigator.onLine is reliable on all normal
+//      browsers. Poll every 500 ms as before.
+//
+//  Tier 2 — live detection (runs forever):
+//    • window 'online' event — this is an OS-level network
+//      interface event. Tor Browser does NOT spoof it because
+//      doing so would break Tor's own connectivity. It fires
+//      correctly on all platforms (Windows, Linux, macOS, Tails)
+//      whenever a NIC transitions from down→up.
+//    • window 'offline' event — fires on NIC up→down transition.
+//
+//  LIMITATION: If the user opens the file while already connected
+//  on Tor Browser, the startup check cannot detect this (spoofed
+//  navigator.onLine, no fetch allowed by CSP). The overlay will
+//  NOT appear in that specific case. However, Tor Browser routes
+//  all traffic through the Tor network so there is no direct IP
+//  leak from a file:// page. The correct usage is always to
+//  disconnect before opening. If they then connect while the page
+//  is open, Tier 2 catches it instantly.
+
+// onlineWarningDismissed declared at top of script #2 (bootstrap)
+
+const _isFileProtocol = (location.protocol === 'file:');
+
+let _initialRenderDone = false;
+
+function instantWipeAll() {
+  for (let r = 0; r < ROWS; r++)
+    for (let c = 0; c < COLS; c++) {
+      grid[r][c]  = false;
+      grid2[r][c] = false;
+    }
+  selRow = 0; selCol = 0; gridPage = 1;
+  ['word-input', 'num-input'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  ['word-result', 'num-result'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.style.display = 'none'; el.innerHTML = ''; }
+  });
+  const ws = document.getElementById('word-suggests');
+  if (ws) ws.innerHTML = '';
+  // Skip renderGrid() before the first intentional render — otherwise
+  // we fire it with a potentially unlaid-out grid panel on Tor Browser
+  // and end up with an invisible grid. The initial render is handled
+  // by _tryInitialRender().
+  if (_initialRenderDone) renderGrid();
+}
+__setBootStep(5, 'wipe & UI helpers ready…');
+
+function _setOfflineUI() {
+  const overlay = document.getElementById('online-overlay');
+  if (overlay) overlay.style.display = 'none';
+  const sl = document.getElementById('sec-status-line');
+  if (sl) {
+    // If the user is in air-gapped-override mode (Tor Browser / Tails),
+    // show a distinct warning instead of the normal green offline message.
+    if (_airGappedOverride) {
+      sl.textContent = '⚠ TOR BROWSER / TAILS MODE · BEING OFFLINE IS YOUR RESPONSIBILITY';
+      sl.style.color = '#ff4444';
+    } else {
+      sl.textContent = '🔒 SECURITY IS OK · YOU ARE OFFLINE ✓';
+      sl.style.color = '#00cc66';
+    }
+  }
+  // Whenever we transition into offline state, make sure the grid
+  // has been rendered at least once. No-op if already rendered.
+  _tryInitialRender();
+}
+
+function _setOnlineUI() {
+  instantWipeAll();
+  // Uncheck the CSS dismissal checkbox so the !important rule
+  // stops hiding the overlay, allowing display:flex below to work.
+  const cb = document.getElementById('overlay-dismissed');
+  if (cb) cb.checked = false;
+  const overlay = document.getElementById('online-overlay');
+  if (overlay) overlay.style.display = 'flex';
+  onlineWarningDismissed = false;
+  const sl = document.getElementById('sec-status-line');
+  if (sl) { sl.textContent = '🔒 SECURITY · ⚠ YOU ARE ONLINE'; sl.style.color = '#ff4444'; }
+}
+
+function checkOnlineStatus() {
+  // navigator.onLine is reliable on all normal browsers (Chrome,
+  // Firefox, Safari) on Windows, Linux, and macOS — both for
+  // file:// and http(s)://.
+  //
+  // Tor Browser exception: Tor permanently spoofs
+  // navigator.onLine === true to prevent fingerprinting.
+  // This means the startup check fires a false alarm when opened
+  // on Tails/Tor while air-gapped. This is unavoidable — there
+  // is no unspoofed API that reveals real network state without
+  // a network request (which our CSP blocks). Workaround for
+  // Tor/Tails: disconnect before opening, then click RETRY.
+  // Any live network-up transition after load is caught by the
+  // window 'online' event (Tier 2), which Tor does NOT spoof.
+  if (navigator.onLine) {
+    _setOnlineUI();
+  } else {
+    _setOfflineUI();
+  }
+}
+
+function dismissOnlineWarning() { /* intentionally disabled — no bypass */ }
+
+// _forceAirGapped(): escape hatch for Tor Browser / Tails users.
+// Tor permanently spoofs navigator.onLine=true so RETRY never
+// clears the overlay for them. This button lets a user who has
+// verified they are air-gapped manually dismiss the overlay.
+// The 500ms poll is suspended for the session. Live NIC transitions
+// (window 'online' event) still fire the overlay if they actually
+// go online afterwards, and clear the override automatically.
+// _airGappedOverride declared at top of script #2 (bootstrap)
+function _forceAirGapped() {
+  _airGappedOverride = true;
+  onlineWarningDismissed = true;
+  _setOfflineUI(); // will show Tor-specific red warning text
+  _tryInitialRender(); // first render happens NOW — panel is laid out
+}
+__setBootStep(6, 'online detection ready…');
+
+// ── STAGE-2 BUTTON HANDLERS (full implementation) ─────────────
+// The bootstrap at the top of script #2 already wired clickable
+// stub handlers to the overlay buttons. By this point the full
+// _forceAirGapped and checkOnlineStatus are defined, so the
+// `typeof === 'function'` check inside the stage-1 handlers will
+// now succeed and the full implementations will be called. The
+// only thing we need to do here is hide the diagnostic loading
+// message — everything is ready.
+__setBootStep(8, 'all systems ready ✓');
+(function _stage2Finalize() {
+  const loadingMsg = document.getElementById('overlay-loading-msg');
+  if (loadingMsg) loadingMsg.style.display = 'none';
+})();
+
+// ── STARTUP ──────────────────────────────────────────────────
+//
+// Goal: the user should NEVER see a blank/empty page. The moment
+// the browser paints, they see either (a) a ready-to-use grid, or
+// (b) the online-warning overlay — never a half-rendered state
+// where the grid has not yet drawn and the overlay has not yet
+// appeared.
+//
+// To achieve this we split the startup into two phases:
+//
+//   Phase A (synchronous, right now):
+//     • Evaluate navigator.onLine
+//     • If the browser reports online (real connection OR Tor's
+//       spoofed value), show the overlay immediately. DO NOT render
+//       the grid yet — the user is blocked at the overlay anyway.
+//     • If the browser reports offline, schedule the grid render.
+//
+//   Phase B (after user action or confirmed offline):
+//     • The grid renders exactly once, after layout is settled.
+//     • Triggers: the RETRY button, the "I AM AIR-GAPPED" button,
+//       or a direct confirmed-offline startup.
+//
+// This removes the Tor-Browser first-load bug where the grid would
+// render against an unlaid-out panel, end up invisible, and force
+// the user to reload to get a usable page.
+
+function _tryInitialRender() {
+  if (_initialRenderDone) return;
+
+  // Helper: actually do the render, but only when #grid-panel has
+  // real dimensions. Tor Browser on a cold start can run scripts
+  // before flex-layout has settled, leaving clientWidth at 0. If
+  // we render then, calcCellSize() reads garbage and the grid is
+  // either invisible or sized for a non-existent viewport.
+  const _doRender = () => {
+    const panel = document.getElementById('grid-panel');
+    if (!panel || panel.clientWidth < 100 || panel.clientHeight < 100) {
+      // Layout not ready yet — try again on the next animation frame.
+      // We deliberately do not set _initialRenderDone so retries keep
+      // happening until a sane render succeeds.
+      requestAnimationFrame(_doRender);
+      return;
+    }
+    _initialRenderDone = true;
+    renderGrid();
+  };
+
+  // Wait until the document is fully loaded (stylesheets parsed,
+  // initial layout complete). On Tor Browser cold starts this can
+  // take noticeably longer than on warm reloads — which is exactly
+  // why first load was breaking and second load worked.
+  if (document.readyState === 'complete') {
+    requestAnimationFrame(() => requestAnimationFrame(_doRender));
+  } else {
+    window.addEventListener('load', () => {
+      requestAnimationFrame(() => requestAnimationFrame(_doRender));
+    }, { once: true });
+  }
+}
+__setBootStep(7, 'render scheduler ready…');
+
+// Phase A — fire synchronously as soon as this script is parsed.
+//
+// IMPORTANT: As of v1.1.9 the overlay is SHOWN BY DEFAULT in the HTML
+// itself (display:flex inline). This means even if this JavaScript
+// fails to execute, is delayed by Tor Browser's strict mode, or runs
+// against an unlaid-out DOM, the user always sees the warning page on
+// first load. The user can never see a blank/empty grid — the worst
+// case is the warning overlay sitting there with the air-gap button
+// still working (HTML+inline-onclick is robust).
+//
+// The job of this Phase A code is therefore the OPPOSITE of before:
+// only HIDE the overlay if we are confidently offline. Otherwise we
+// leave the overlay alone and let the user click I AM AIR-GAPPED.
+if (!navigator.onLine) {
+  // Genuinely offline (some normal browsers report this correctly).
+  // Hide the overlay and render the grid.
+  _setOfflineUI();
+  _tryInitialRender();
+} else {
+  // Either real online OR Firefox/Tor's "default true" — overlay
+  // stays visible (already so via inline HTML). Update the badge text.
+  const sl = document.getElementById('sec-status-line');
+  if (sl) { sl.textContent = '🔒 SECURITY · ⚠ YOU ARE ONLINE'; sl.style.color = '#ff4444'; }
+  onlineWarningDismissed = false;
+}
+
+// ── POLLING ───────────────────────────────────────────────────
+// Poll every 500 ms on all protocols. On file:// with Tor Browser
+// this polls a spoofed value and keeps showing the overlay, but
+// that is the correct fail-safe: the user must click RETRY or
+// I AM AIR-GAPPED to confirm they are offline before proceeding.
+setInterval(function() {
+  if (!onlineWarningDismissed && !_airGappedOverride) checkOnlineStatus();
+}, 500);
+
+// ── LIVE NETWORK EVENTS (Tier 2 — all browsers, all protocols) ─
+// OS-level NIC transition events. Tor Browser does NOT spoof these.
+// Fire correctly on Windows, Linux, macOS, and Tails.
+window.addEventListener('online', function() {
+  _airGappedOverride = false; // real network-up — override no longer valid
+  onlineWarningDismissed = false;
+  _setOnlineUI();
+});
+window.addEventListener('offline', function() {
+  _setOfflineUI();
+  _tryInitialRender(); // catch the case where user disconnects while overlay was up
+  hideOnlineBanner();
+});
+
+function showOnlineBanner() {
+  let banner = document.getElementById('online-banner');
+  if (!banner) {
+    banner = document.createElement('div');
+    banner.id = 'online-banner';
+    banner.style.cssText =
+      'position:fixed;top:52px;left:0;right:0;z-index:9998;' +
+      'background:#3a0a0a;border-bottom:2px solid #cc2222;padding:8px 18px;' +
+      'display:flex;align-items:center;gap:12px;font-size:13px;color:#ff8888;';
+    banner.innerHTML =
+      '<span>&#128128; Internet connection detected. Real seeds should only be handled offline.</span>' +
+      '<button onclick="dismissOnlineWarning();hideOnlineBanner();" ' +
+      'style="margin-left:auto;padding:4px 12px;border-radius:4px;background:#1a0505;' +
+      'border:1px solid #661111;color:#ff6666;cursor:pointer;font-size:12px;">Dismiss</button>';
+    document.body.appendChild(banner);
+  }
+  banner.style.display = 'flex';
+}
+function hideOnlineBanner() {
+  const b = document.getElementById('online-banner');
+  if (b) b.style.display = 'none';
+}
+
+
+// ── DONATE PANEL ─────────────────────────────────────────────
+const DONATE_BTC_ADDRESS = 'https://is.gd/0ZeCoT';
+
+let donateOpen = false;
+let donateRendered = false;
+
+function toggleDonate() {
+  donateOpen = !donateOpen;
+  const box = document.getElementById('donate-box');
+  const btn = document.getElementById('donate-toggle');
+  box.classList.toggle('open', donateOpen);
+  btn.classList.toggle('open', donateOpen);
+  if (donateOpen && !donateRendered) {
+    renderDonateQR();
+    donateRendered = true;
+  }
+}
+
+function renderDonateQR() {
+  const svgEl   = document.getElementById('donate-qr-svg');
+  const addrEl  = document.getElementById('donate-addr-text');
+  if (!svgEl) return;
+
+  if (!DONATE_BTC_ADDRESS || DONATE_BTC_ADDRESS === 'REPLACE_WITH_YOUR_BTC_ADDRESS') {
+    svgEl.setAttribute('width',  '168');
+    svgEl.setAttribute('height', '168');
+    svgEl.innerHTML =
+      '<rect width="168" height="168" fill="white"/>' +
+      '<text x="84" y="84" text-anchor="middle" font-family="monospace" ' +
+        'font-size="9" fill="#aaa">Set DONATE_BTC_ADDRESS</text>';
+    if (addrEl) addrEl.textContent = '(address not set)';
+    return;
+  }
+
+  const uri     = DONATE_BTC_ADDRESS;
+  const bytes   = Array.from(uri).map(c => c.charCodeAt(0));
+  const qr      = _buildByteQR(bytes);
+  if (!qr) { svgEl.innerHTML = '<rect width="168" height="168" fill="#fee"/>'; return; }
+
+  const px = 6, qz = px * 4;
+  const total = qr.size * px + 2 * qz;
+  svgEl.setAttribute('width',  total);
+  svgEl.setAttribute('height', total);
+  let out = '<rect width="' + total + '" height="' + total + '" fill="white"/>';
+  for (let r = 0; r < qr.size; r++)
+    for (let c = 0; c < qr.size; c++)
+      if (qr.matrix[r][c] === 1)
+        out += '<rect x="' + (qz + c*px) + '" y="' + (qz + r*px) +
+               '" width="' + px + '" height="' + px + '" fill="black"/>';
+  svgEl.innerHTML = out;
+  if (addrEl) addrEl.textContent = 'is.gd/0ZeCoT  ·  BTC + Lightning';
+}
+
+function _buildByteQR(inputBytes) {
+  const n = inputBytes.length;
+  let version, nData, nEC, byteCap;
+  if      (n <= 20) { version = 2; nData = 28; nEC = 16; byteCap = 20; }
+  else if (n <= 32) { version = 3; nData = 44; nEC = 26; byteCap = 32; }
+  else if (n <= 48) { version = 4; nData = 64; nEC = 36; byteCap = 48; }
+  else              { return null; }
+
+  const bits = [];
+  bits.push(0,1,0,0);
+  for (let i = 7; i >= 0; i--) bits.push((n >> i) & 1);
+  for (const b of inputBytes)
+    for (let i = 7; i >= 0; i--) bits.push((b >> i) & 1);
+  for (let i = 0; i < 4 && bits.length < nData * 8; i++) bits.push(0);
+  while (bits.length % 8 !== 0) bits.push(0);
+  const padCW = [0xEC, 0x11]; let pi = 0;
+  while (bits.length < nData * 8)
+    for (let i = 7; i >= 0; i--) bits.push((padCW[pi++ % 2] >> i) & 1);
+
+  const dataCW = [];
+  for (let i = 0; i < nData * 8; i += 8) {
+    let v = 0;
+    for (let j = 0; j < 8; j++) v = (v << 1) | bits[i + j];
+    dataCW.push(v);
+  }
+
+  const ecCW = _rsEncode(dataCW, nEC);
+
+  const allBits = [];
+  for (const cw of [...dataCW, ...ecCW])
+    for (let i = 7; i >= 0; i--) allBits.push((cw >> i) & 1);
+  const remainderBits = version === 2 ? 7 : (version === 3 ? 7 : 7);
+  for (let i = 0; i < remainderBits; i++) allBits.push(0);
+
+  const {m: base, f: fixed, S} = _buildMatrix(version, allBits);
+
+  let bestMask = 0, bestPenalty = Infinity;
+  for (let mid = 0; mid < 8; mid++) {
+    const mat = base.map(r => r.slice());
+    for (let r = 0; r < S; r++)
+      for (let c = 0; c < S; c++)
+        if (!fixed[r][c] && _maskCond(mid, r, c)) mat[r][c] ^= 1;
+    _writeFormat(mat, S, mid, _FMT_M);
+    const p = _penalty(mat, S);
+    if (p < bestPenalty) { bestPenalty = p; bestMask = mid; }
+  }
+  const final = base.map(r => r.slice());
+  for (let r = 0; r < S; r++)
+    for (let c = 0; c < S; c++)
+      if (!fixed[r][c] && _maskCond(bestMask, r, c)) final[r][c] ^= 1;
+  _writeFormat(final, S, bestMask, _FMT_M);
+  return { matrix: final, size: S };
+}
+</script>
+
+
+
+<!-- INFO PANEL -->
+<div id="info-panel" style="display:none;position:fixed;top:var(--header-h);left:0;bottom:0;right:0;z-index:300;background:rgba(0,0,0,0.96);overflow-y:auto;">
+  <div class="overlay-inner"><div style="max-width:760px;border:2px solid #ccaa00;border-radius:16px;background:#0d0c00;font-family:system-ui,-apple-system,sans-serif;padding:32px 20px;box-sizing:border-box;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:64px;margin-bottom:12px;line-height:1;">&#9888;</div>
+      <div style="font-size:26px;font-weight:800;color:#ffdd00;letter-spacing:-0.5px;margin-bottom:6px;">USAGE WARNING</div>
+      <div style="font-size:11px;font-weight:700;color:#ccaa00;letter-spacing:1.2px;text-transform:uppercase;">Read before entering any seed words</div>
+    </div>
+    <div style="text-align:left;">
+      <p style="font-size:14px;color:#cccccc;line-height:1.8;margin:0 0 12px;">This tool is for <strong style="color:#ffffff;">visually encoding or decoding</strong> an existing valid BIP39 seed phrase onto a Binary Grid dot map. It is not a seed generator.</p>
+      <div style="display:block;background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.4px;padding:8px 14px;margin:4px 0 16px;border-radius:3px;text-align:center;">DO NOT USE THIS PAGE TO GENERATE YOUR SEED PHRASE!</div>
+      <p style="font-size:14px;color:#cccccc;line-height:1.8;margin:0 0 12px;">Creating a seed phrase here will result in <strong style="color:#ffdd00;">insufficient entropy</strong> and an invalid checksum on the 12th or 24th word. Your funds would not be secure.</p>
+      <p style="font-size:14px;color:#cccccc;line-height:1.8;margin:0 0 4px;">Always generate your seed phrase using a trusted, dedicated tool such as <strong style="color:#ffffff;">SeedSigner</strong>, a hardware wallet, or another audited offline generator.</p>
+    </div>
+    <div style="text-align:center;margin-top:28px;">
+      <button onclick="toggleInfoPanel()" style="padding:14px 44px;border-radius:8px;background:#ffdd00;border:none;color:#000000;font-size:16px;font-weight:800;letter-spacing:0.8px;cursor:pointer;">I UNDERSTAND</button>
+    </div>
+  </div>
+  </div></div>
+</div>
+
+
+<!-- FLAME / SECURITY PANEL -->
+<div id="flame-panel" style="display:none;position:fixed;top:var(--header-h);left:0;bottom:0;right:0;z-index:300;background:rgba(0,0,0,0.96);overflow-y:auto;">
+  <div class="overlay-inner"><div style="max-width:760px;border:2px solid #ff6b00;border-radius:16px;background:#0d0600;font-family:system-ui,-apple-system,sans-serif;padding:32px 20px;box-sizing:border-box;">
+    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:60px;margin-bottom:10px;">🔥</div><div style="font-size:26px;font-weight:800;color:#ff6b00;letter-spacing:-0.5px;margin-bottom:5px;">SECURITY</div><div style="font-size:11px;font-weight:700;color:#ff6b0099;letter-spacing:1.2px;text-transform:uppercase;">Seed phrase &amp; device safety</div></div>
+    <div style="font-size:14px;color:#cccccc;line-height:1.8;">
+<div style="font-size:11px;font-weight:700;color:#ff6b00;letter-spacing:1.2px;text-transform:uppercase;margin:18px 0 5px;border-bottom:1px solid #ff6b0033;padding-bottom:3px;">What this tool does</div><p style="margin:0 0 11px;">Offline BIP39 reference for stamping metal backup plates (KeyTag, TinySeed, NanoSeed). Displays your Compact SeedQR. <strong style="color:#ffffff;">Does not</strong> generate seeds, derive keys, show balances, or sign transactions.</p><div style="background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.3px;padding:7px 14px;margin:6px 0 12px;border-radius:3px;text-align:center;">NEVER SCAN OR PHOTOGRAPH THE SEED QR!</div><div style="font-size:11px;font-weight:700;color:#ff4444;letter-spacing:1.2px;text-transform:uppercase;margin:18px 0 5px;border-bottom:1px solid #ff444433;padding-bottom:3px;">Never use on a connected device</div><p style="margin:0 0 11px;">Your seed phrase grants full, irreversible access to your funds. Even though this page makes no network requests, a connected OS can expose input via keyloggers, clipboard, screen capture, or malware.</p><div style="background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.3px;padding:7px 14px;margin:6px 0 12px;border-radius:3px;text-align:center;">ALWAYS USE THIS TOOL AIR-GAPPED!</div><p style="margin:0 0 11px;">Disconnect all networks (Wi-Fi, Ethernet, Bluetooth). Best practice: boot from a Linux live USB — leaves no trace. Wipe or power off after use.</p><div style="font-size:11px;font-weight:700;color:#ff4444;letter-spacing:1.2px;text-transform:uppercase;margin:18px 0 5px;border-bottom:1px solid #ff444433;padding-bottom:3px;">Protect your seed phrase</div><p style="margin:0 0 11px;">Anyone with your full phrase can drain your funds instantly and permanently. Store only on durable physical media in multiple secure offline locations. Never photograph, digitise, or share it.</p><p style="font-size:12px;color:#777777;font-style:italic;margin:14px 0 0;">For significant value, consider a dedicated air-gapped machine or official hardware wallet recovery procedures.</p>
+    </div>
+<div style="text-align:center;margin-top:26px;"><button onclick="toggleFlamePanel()" style="padding:13px 44px;border-radius:8px;background:#ff6b00;border:none;color:#000000;font-size:16px;font-weight:800;letter-spacing:0.8px;cursor:pointer;">I UNDERSTAND</button></div>
+  </div>
+  </div></div>
+</div>
+<div id="integrity-panel" style="display:none;position:fixed;top:var(--header-h);left:0;bottom:0;right:0;z-index:300;background:rgba(0,0,0,0.96);overflow-y:auto;">
+  <div class="overlay-inner"><div style="max-width:760px;border:2px solid #00cc66;border-radius:16px;background:#030d08;font-family:system-ui,-apple-system,sans-serif;padding:32px 20px;box-sizing:border-box;">
+    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:60px;margin-bottom:10px;">✅</div><div style="font-size:26px;font-weight:800;color:#00cc66;letter-spacing:-0.5px;margin-bottom:5px;">INTEGRITY</div><div style="font-size:11px;font-weight:700;color:#00cc6699;letter-spacing:1.2px;text-transform:uppercase;"></div></div>
+    <div style="font-size:14px;color:#cccccc;line-height:1.8;">
+<p style="margin:0 0 11px;">This is a standalone <strong style="color:#ffffff;">MIT licence</strong> open-source tool published on GitHub. A SHA-256 checksum is published with every release.</p><div style="background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.3px;padding:7px 14px;margin:6px 0 12px;border-radius:3px;text-align:center;">ALWAYS VERIFY THE FILE BEFORE USE!</div><div style="font-size:11px;font-weight:700;color:#00cc66;letter-spacing:1.2px;text-transform:uppercase;margin:18px 0 5px;border-bottom:1px solid #00cc6633;padding-bottom:3px;">Compute the hash</div><p style="margin:0 0 11px;">Run the command for your platform and compare the result with the hash in the GitHub release notes.</p><div style="background:#0a1a0f;border:1px solid #1a4a2a;border-radius:4px;padding:14px 18px;margin:10px 0 14px;"><div style="margin-bottom:9px;"><span style="font-size:10px;color:#448866;display:block;">Linux (bash)</span><span style="font-size:11px;color:#fff600;font-family:monospace;">sha256sum dotbip-offline_v1.1.19.html</span></div><div style="margin-bottom:9px;"><span style="font-size:10px;color:#448866;display:block;">macOS (Terminal)</span><span style="font-size:11px;color:#fff600;font-family:monospace;">shasum -a 256 dotbip-offline_v1.1.19.html</span></div><div style="margin-bottom:9px;"><span style="font-size:10px;color:#448866;display:block;">Windows PowerShell</span><span style="font-size:11px;color:#fff600;font-family:monospace;">Get-FileHash dotbip-offline_v1.1.19.html -Algorithm SHA256</span></div><div><span style="font-size:10px;color:#448866;display:block;">Windows CMD</span><span style="font-size:11px;color:#fff600;font-family:monospace;">certutil -hashfile dotbip-offline_v1.1.19.html SHA256</span></div></div><div style="font-size:11px;font-weight:700;color:#00cc66;letter-spacing:1.2px;text-transform:uppercase;margin:18px 0 5px;border-bottom:1px solid #00cc6633;padding-bottom:3px;">Download only from the official source</div><p style="margin:0 0 11px;">Never use a copy from any other website, email, or third-party link. Malicious copies of crypto tools are common. Official source: <span style="color:#00cc66;font-family:monospace;">github.com/dotbip</span></p>
+    </div>
+<div style="text-align:center;margin-top:26px;"><button onclick="toggleIntegrityPanel()" style="padding:13px 44px;border-radius:8px;background:#00cc66;border:none;color:#000000;font-size:16px;font-weight:800;letter-spacing:0.8px;cursor:pointer;">I UNDERSTAND</button></div>
+  </div>
+  </div></div>
+</div>
+<!-- PADLOCK / HIGH SECURITY TIP PANEL -->
+<div id="padlock-panel" style="display:none;position:fixed;top:var(--header-h);left:0;bottom:0;right:0;z-index:300;background:rgba(0,0,0,0.96);overflow-y:auto;">
+  <div class="overlay-inner"><div style="max-width:760px;border:2px solid #aa88ff;border-radius:16px;background:#0a0814;font-family:system-ui,-apple-system,sans-serif;padding:32px 20px;box-sizing:border-box;">
+    <div style="text-align:center;margin-bottom:20px;"><div style="font-size:60px;margin-bottom:10px;">🔒</div><div style="font-size:26px;font-weight:800;color:#aa88ff;letter-spacing:-0.5px;margin-bottom:5px;">HIGH SECURITY TIP</div><div style="font-size:11px;font-weight:700;color:#aa88ff99;letter-spacing:1.2px;text-transform:uppercase;">Passphrase protection</div></div>
+    <div style="font-size:14px;color:#cccccc;line-height:1.8;">
+      <p style="margin:0 0 12px;">To avoid anyone who finds your punched metal backup gaining access to significant funds, seriously consider using a <strong style="color:#ffffff;">passphrase</strong> — also known as the <strong style="color:#aa88ff;">13th or 25th word</strong>.</p>
+      <div style="background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.3px;padding:7px 14px;margin:6px 0 14px;border-radius:3px;text-align:center;">STORE YOUR PASSPHRASE SEPARATELY FROM YOUR SEED!</div>
+      <p style="margin:0 0 12px;">Keep your passphrase only in your head or stored in a completely separate physical location from your seed backup. This means a thief who finds your metal plate cannot access your funds without also knowing the passphrase.</p>
+      <p style="margin:0 0 4px;font-size:12px;color:#888888;font-style:italic;">A passphrase is supported by all major hardware wallets (Ledger, Trezor, Coldcard, Passport, Keystone, SeedSigner). It creates a completely separate wallet — make sure you test access before storing real funds.</p>
+    </div>
+    <div style="text-align:center;margin-top:26px;"><button onclick="togglePadlockPanel()" style="padding:13px 44px;border-radius:8px;background:#aa88ff;border:none;color:#000000;font-size:16px;font-weight:800;letter-spacing:0.8px;cursor:pointer;">I UNDERSTAND</button></div>
+  </div>
+  </div></div>
+</div>
+<!-- INDEXING PANEL -->
+<div id="indexing-panel" style="display:none;position:fixed;top:var(--header-h);left:0;bottom:0;right:0;z-index:300;background:rgba(0,0,0,0.96);overflow-y:auto;">
+  <div class="overlay-inner"><div style="max-width:760px;border:2px solid #ff4488;border-radius:16px;background:#0d0208;font-family:system-ui,-apple-system,sans-serif;padding:32px 20px;box-sizing:border-box;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="font-size:60px;font-weight:900;color:#ff4488;margin-bottom:10px;font-family:monospace;line-height:1;">#</div>
+      <div style="font-size:26px;font-weight:800;color:#ff4488;letter-spacing:-0.5px;margin-bottom:5px;">INDEXING</div>
+      <div style="font-size:11px;font-weight:700;color:#ff448899;letter-spacing:1.2px;text-transform:uppercase;">1-based word numbering</div>
+    </div>
+    <div style="font-size:14px;color:#cccccc;line-height:1.8;">
+      <p style="margin:0 0 14px;">DotBip uses a <strong style="color:#ffffff;">One Based Index</strong> system. This means:</p>
+      <div style="background:#1a0410;border:1px solid #ff448833;border-radius:6px;padding:14px 20px;margin:0 0 16px;font-family:monospace;">
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="color:#ff4488;font-weight:700;">abandon</span><span style="color:#ffffff;">= 1</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+          <span style="color:#ff4488;font-weight:700;">elephant</span><span style="color:#ffffff;">= 575</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;">
+          <span style="color:#ff4488;font-weight:700;">zoo</span><span style="color:#ffffff;">= 2048</span>
+        </div>
+      </div>
+      <p style="margin:0 0 12px;">Some apps use a <strong style="color:#ffaacc;">zero based</strong> indexing system, but that is not a human way to deal with the words in the list. With zero-based indexing, <em>abandon</em> would be 0 and <em>zoo</em> would be 2047.</p>
+      <p style="margin:0 0 12px;">The original BIP39 word list has no numbers — they are added later by different software implementations, and this has caused confusion. A word's position on the list depends entirely on whether the developer started counting at 0 or 1.</p>
+      <div style="background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.3px;padding:7px 14px;margin:6px 0 12px;border-radius:3px;text-align:center;">STAY SAFE — DOCUMENT YOUR INDEXING SYSTEM!</div>
+      <p style="margin:0;font-size:12px;color:#888888;font-style:italic;">Always record whether your backup was created with 1-based or 0-based indexing. When recovering, use the same system you used when encoding.</p>
+    </div>
+    <div style="text-align:center;margin-top:26px;">
+      <button onclick="toggleIndexingPanel()" style="padding:13px 44px;border-radius:8px;background:#ff4488;border:none;color:#ffffff;font-size:16px;font-weight:800;letter-spacing:0.8px;cursor:pointer;">I UNDERSTAND</button>
+    </div>
+  </div>
+  </div></div>
+</div>
+<!-- DEVICE GUIDELINES PANEL -->
+<div id="device-panel" style="display:none;position:fixed;top:var(--header-h);left:0;bottom:0;right:0;z-index:300;background:rgba(0,0,0,0.96);overflow-y:auto;">
+  <div class="overlay-inner"><div style="max-width:760px;border:2px solid #00aaff;border-radius:16px;background:#010a14;font-family:system-ui,-apple-system,sans-serif;padding:32px 20px;box-sizing:border-box;">
+    <div style="text-align:center;margin-bottom:20px;">
+      <div style="margin-bottom:12px;">
+        <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="8" y="12" width="48" height="32" rx="4" stroke="#00aaff" stroke-width="3"/>
+          <path d="M4 52 H60" stroke="#00aaff" stroke-width="3" stroke-linecap="round"/>
+          <path d="M22 44 L22 52" stroke="#00aaff" stroke-width="2.5" stroke-linecap="round"/>
+          <path d="M42 44 L42 52" stroke="#00aaff" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div style="font-size:26px;font-weight:800;color:#00aaff;letter-spacing:-0.5px;margin-bottom:5px;">DEVICE GUIDELINES</div>
+      <div style="font-size:11px;font-weight:700;color:#00aaff99;letter-spacing:1.2px;text-transform:uppercase;">High-security usage protocol</div>
+    </div>
+    <div style="font-size:14px;color:#cccccc;line-height:1.8;">
+
+      <p style="margin:0 0 14px;">This standalone offline BIP39 tool (in the form of a single html file called dotbip-offline_vx.x.x.html) is for high-security minded Bitcoin users who physically stamp their 12- or 24-word seed into steel or titanium using the 12×12 or 12×24 Dot Map.</p>
+
+      <p style="margin:0 0 18px;">This tool is also designed to educate on the security aspects of the BIP39 standard and the Binary Grid encoding system.</p>
+
+      <div style="background:#ffffff;color:#000000;font-weight:800;font-size:13px;letter-spacing:0.3px;padding:7px 14px;margin:6px 0 18px;border-radius:3px;text-align:center;">SECURE USAGE PROTOCOL</div>
+
+      <div style="background:#010e1a;border:1px solid #00aaff33;border-radius:8px;padding:16px 20px;margin:0 0 18px;">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+          <span style="color:#00aaff;font-weight:800;font-size:15px;flex-shrink:0;margin-top:2px;min-width:20px;">1.</span>
+          <span>Boot exclusively from a <strong style="color:#ffffff;">Linux live USB</strong> (Tails (tails.net) or a verified distro). Never use a persistent OS.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+          <span style="color:#00aaff;font-weight:800;font-size:15px;flex-shrink:0;margin-top:2px;min-width:20px;">2.</span>
+          <span>Disable and <strong style="color:#ffffff;">physically unplug</strong> all wireless interfaces — Bluetooth, Wi-Fi, and Ethernet — before booting.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:14px;">
+          <span style="color:#00aaff;font-weight:800;font-size:15px;flex-shrink:0;margin-top:2px;min-width:20px;">3.</span>
+          <span>We recommend using a laptop. No external mouse. No external keyboard. No extra USB devices. <strong style="color:#ffffff;">Malicious hardware exists</strong> that can silently log keystrokes or exfiltrate screenshots.</span>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;">
+          <span style="color:#ff6644;font-weight:800;font-size:15px;flex-shrink:0;margin-top:2px;min-width:20px;">4.</span>
+          <span>Avoid using this file on <strong style="color:#ff6644;">Windows, macOS, or any persistent OS.</strong> Spyware, keyloggers, and screen-grabbers are rampant on everyday operating systems.</span>
+        </div>
+      </div>
+
+      <div style="background:#0d0202;border:1px solid #ff444455;border-radius:6px;padding:14px 18px;margin:0 0 14px;text-align:center;">
+        <span style="color:#ff6666;font-size:13px;font-weight:700;letter-spacing:0.3px;">Deviate at your own risk. Lost funds are irrecoverable.</span>
+      </div>
+
+      <p style="margin:0;text-align:center;color:#aaaaaa;font-size:13px;font-style:italic;letter-spacing:0.3px;">Your security. Your responsibility. Stay paranoid. Stay safe.</p>
+
+    </div>
+    <div style="text-align:center;margin-top:28px;">
+      <button onclick="toggleDevicePanel()" style="padding:13px 44px;border-radius:8px;background:#00aaff;border:none;color:#000000;font-size:16px;font-weight:800;letter-spacing:0.8px;cursor:pointer;">I UNDERSTAND</button>
+    </div>
+  </div>
+  </div></div>
+</div>
+</body>
+</html>
